@@ -1,6 +1,6 @@
 # Ing. Henry - Dynamic Portfolio Website
 
-A modern, full-stack portfolio website built with React (frontend) and NestJS (backend), featuring a comprehensive admin dashboard, analytics tracking, and content management system.
+A modern, full-stack portfolio website built with React (frontend) and NestJS (backend), featuring a comprehensive admin dashboard, analytics tracking, and content management system. Deployed on AWS with S3, CloudFront, Lambda, and API Gateway.
 
 ## 🚀 Features
 
@@ -15,7 +15,7 @@ A modern, full-stack portfolio website built with React (frontend) and NestJS (b
 ### Admin Dashboard
 - **Secure Authentication**: JWT-based auth with refresh tokens
 - **Content Management**: Full CRUD for projects, services, skills, and team
-- **Media Library**: File upload and management with AWS S3 integration
+- **Media Library**: File upload and management with Cloudinary integration
 - **Analytics Dashboard**: Visitor insights, charts, and performance metrics
 - **Contact Management**: View, respond to, and manage contact submissions
 - **Settings Panel**: Site configuration and user preferences
@@ -23,10 +23,10 @@ A modern, full-stack portfolio website built with React (frontend) and NestJS (b
 ### Backend API
 - **RESTful API**: Well-documented API with Swagger/OpenAPI
 - **Database**: PostgreSQL with Prisma ORM
-- **Caching**: Redis for improved performance
 - **Security**: Rate limiting, CORS, helmet, input validation
 - **Email Service**: Nodemailer for notifications and alerts
-- **File Storage**: AWS S3 integration for media files
+- **File Storage**: Cloudinary integration for media files
+- **Serverless**: AWS Lambda deployment with API Gateway
 
 ## 🛠 Tech Stack
 
@@ -43,10 +43,17 @@ A modern, full-stack portfolio website built with React (frontend) and NestJS (b
 - **NestJS** with TypeScript
 - **Prisma** ORM with PostgreSQL
 - **JWT** authentication
-- **Redis** for caching
 - **Winston** for logging
 - **Swagger** for API documentation
-- **AWS SDK** for S3 integration
+- **Serverless Framework** for AWS Lambda deployment
+
+### Infrastructure
+- **AWS S3** for static website hosting
+- **AWS CloudFront** for CDN and SSL
+- **AWS Lambda** for serverless backend
+- **AWS API Gateway** for API management
+- **AWS Route 53** for DNS management
+- **AWS Certificate Manager** for SSL certificates
 
 ## 📦 Installation
 
@@ -212,23 +219,106 @@ npm run db:studio
 
 ## 🚀 Deployment
 
-### Frontend (Netlify/Vercel)
-1. Build the frontend: `cd frontend && npm run build`
-2. Deploy the `dist` folder to your hosting platform
-3. Configure environment variables
+This project supports both local development and AWS production deployment with full CI/CD pipelines.
 
-### Backend (AWS ECS/Railway/Heroku)
-1. Build the backend: `cd backend && npm run build`
-2. Set up production database and Redis
-3. Configure environment variables
-4. Deploy using your preferred platform
+### Local Development
 
-### Environment Variables for Production
-Ensure all environment variables are properly set in your production environment, especially:
+#### Option 1: Traditional Development Servers
+```bash
+# Terminal 1 - Backend
+cd backend
+npm run start:dev
+
+# Terminal 2 - Frontend
+cd frontend
+npm run dev
+```
+
+#### Option 2: Serverless Local Testing
+```bash
+# Terminal 1 - Backend with Serverless Offline
+cd backend
+npm run start:offline
+
+# Terminal 2 - Frontend
+cd frontend
+npm run dev
+```
+
+### AWS Production Deployment
+
+The project is configured for AWS deployment with the following architecture:
+
+- **Frontend**: React app → S3 Static Website → CloudFront CDN → Route 53 + ACM SSL
+- **Backend**: NestJS API → AWS Lambda → API Gateway → Route 53
+
+#### Prerequisites
+- AWS CLI installed and configured
+- Node.js 18+ installed
+- Domain name registered
+
+#### Quick Deploy Commands
+
+**Backend (AWS Lambda):**
+```bash
+cd backend
+cp .env.example .env
+# Configure your .env file
+npm run deploy:prod
+```
+
+**Frontend (S3 + CloudFront):**
+```bash
+cd frontend
+npm run build
+./scripts/deploy-aws.sh dhokabeatz-portfolio
+./scripts/setup-cloudfront.sh dhokabeatz-portfolio dhokabeatz.com
+```
+
+#### CI/CD with GitHub Actions
+
+The project includes automated deployment workflows:
+
+1. **Push to main branch** → Triggers deployment
+2. **Frontend changes** → Deploy to S3 + CloudFront invalidation  
+3. **Backend changes** → Deploy to AWS Lambda
+
+**Required GitHub Secrets:**
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+- `AWS_REGION`
 - `DATABASE_URL`
 - `JWT_SECRET`
-- `AWS_*` variables for S3
-- `SMTP_*` variables for email
+- `CLOUDINARY_*` variables
+- `EMAIL_*` variables
+- `VITE_API_URL`
+- `CLOUDFRONT_DISTRIBUTION_ID`
+
+#### Detailed Setup Guide
+
+For complete AWS setup instructions, see **[AWS_DEPLOYMENT_GUIDE.md](./AWS_DEPLOYMENT_GUIDE.md)**
+
+### Environment Variables for Production
+
+#### Backend (.env)
+```bash
+DATABASE_URL="postgresql://user:pass@host:5432/db"
+JWT_SECRET="your-super-secret-jwt-key"
+CLOUDINARY_CLOUD_NAME="your-cloud-name"
+CLOUDINARY_API_KEY="your-api-key"
+CLOUDINARY_API_SECRET="your-api-secret"
+EMAIL_HOST="smtp.gmail.com"
+EMAIL_USER="your-email@gmail.com"
+EMAIL_PASS="your-app-password"
+FRONTEND_URL="https://dhokabeatz.com"
+```
+
+#### Frontend (.env.production)
+```bash
+VITE_API_URL=https://api-id.execute-api.us-east-1.amazonaws.com/prod/api
+VITE_APP_NAME="Ing. Henry Portfolio"
+VITE_NODE_ENV=production
+```
 
 ## 📊 Features in Detail
 

@@ -18,6 +18,14 @@ dist-ssr
 .env.development.local
 .env.test.local
 .env.production.local
+.env.production
+
+# Serverless
+.serverless/
+.serverless_nextjs/
+
+# AWS
+.aws/
 
 # Editor directories and files
 .vscode/*
