@@ -1,6 +1,6 @@
 service: ing-henry-portfolio-backend
 
-frameworkVersion: '3'
+frameworkVersion: "4"
 
 provider:
   name: aws
@@ -11,17 +11,19 @@ provider:
   timeout: 30
   environment:
     NODE_ENV: ${self:provider.stage}
-    DATABASE_URL: ${env:DATABASE_URL}
-    JWT_SECRET: ${env:JWT_SECRET}
-    CLOUDINARY_CLOUD_NAME: ${env:CLOUDINARY_CLOUD_NAME}
-    CLOUDINARY_API_KEY: ${env:CLOUDINARY_API_KEY}
-    CLOUDINARY_API_SECRET: ${env:CLOUDINARY_API_SECRET}
-    EMAIL_HOST: ${env:EMAIL_HOST}
-    EMAIL_PORT: ${env:EMAIL_PORT}
-    EMAIL_USER: ${env:EMAIL_USER}
-    EMAIL_PASS: ${env:EMAIL_PASS}
-    EMAIL_FROM: ${env:EMAIL_FROM}
-    PAYSTACK_SECRET_KEY: ${env:PAYSTACK_SECRET_KEY}
+    DATABASE_URL: ${env:DATABASE_URL, 'postgresql://localhost:5432/portfolio'}
+    JWT_SECRET: ${env:JWT_SECRET, 'default-jwt-secret'}
+    AWS_REGION: ${env:AWS_REGION, 'us-east-1'}
+    # AWS credentials are optional if using IAM roles in Lambda
+    # AWS_ACCESS_KEY_ID: ${env:AWS_ACCESS_KEY_ID, ''}
+    # AWS_SECRET_ACCESS_KEY: ${env:AWS_SECRET_ACCESS_KEY, ''}
+    AWS_S3_BUCKET_NAME: ${env:AWS_S3_BUCKET_NAME, ''}
+    EMAIL_HOST: ${env:EMAIL_HOST, 'smtp.gmail.com'}
+    EMAIL_PORT: ${env:EMAIL_PORT, '587'}
+    EMAIL_USER: ${env:EMAIL_USER, ''}
+    EMAIL_PASS: ${env:EMAIL_PASS, ''}
+    EMAIL_FROM: ${env:EMAIL_FROM, 'noreply@example.com'}
+    PAYSTACK_SECRET_KEY: ${env:PAYSTACK_SECRET_KEY, ''}
     FRONTEND_URL: ${env:FRONTEND_URL, 'https://dhokabeatz.com'}
 
   iam:
@@ -33,17 +35,21 @@ provider:
             - logs:CreateLogStream
             - logs:PutLogEvents
           Resource: arn:aws:logs:*:*:*
+        - Effect: Allow
+          Action:
+            - s3:GetObject
+            - s3:PutObject
+            - s3:DeleteObject
+          Resource: arn:aws:s3:::${env:AWS_S3_BUCKET_NAME}/*
+        - Effect: Allow
+          Action:
+            - s3:ListBucket
+          Resource: arn:aws:s3:::${env:AWS_S3_BUCKET_NAME}
 
 plugins:
   - serverless-offline
-  - serverless-dotenv-plugin
 
 custom:
-  dotenv:
-    exclude:
-      - AWS_ACCESS_KEY_ID
-      - AWS_SECRET_ACCESS_KEY
-      - AWS_SESSION_TOKEN
   serverless-offline:
     httpPort: 4000
     lambdaPort: 3002
@@ -59,7 +65,7 @@ functions:
           path: /{proxy+}
           method: ANY
           cors:
-            origin: '*'
+            origin: "*"
             headers:
               - Content-Type
               - X-Amz-Date
@@ -73,7 +79,7 @@ functions:
           path: /
           method: ANY
           cors:
-            origin: '*'
+            origin: "*"
             headers:
               - Content-Type
               - X-Amz-Date
@@ -87,16 +93,16 @@ functions:
 package:
   exclude:
     - node_modules/.prisma/client/libquery_engine-*
-    - '!node_modules/.prisma/client/libquery_engine-rhel-*'
+    - "!node_modules/.prisma/client/libquery_engine-rhel-*"
     - node_modules/@prisma/engines/**
-    - 'src/**'
-    - 'test/**'
-    - 'logs/**'
-    - '.env*'
-    - 'README.md'
-    - '.gitignore'
-    - 'nest-cli.json'
-    - 'tsconfig*.json'
+    - "src/**"
+    - "test/**"
+    - "logs/**"
+    - ".env*"
+    - "README.md"
+    - ".gitignore"
+    - "nest-cli.json"
+    - "tsconfig*.json"
   include:
     - dist/**
     - node_modules/.prisma/**

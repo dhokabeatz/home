@@ -79,7 +79,7 @@ class AnalyticsService {
     const currentPath = path || window.location.pathname;
 
     try {
-      const response = await fetch(`${this.baseUrl}/api/analytics/track-page-view`, {
+      const response = await fetch(`${this.baseUrl}/analytics/track-page-view`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -111,7 +111,7 @@ class AnalyticsService {
     if (duration < 1000) return; // Ignore very short durations
 
     try {
-      await fetch(`${this.baseUrl}/api/analytics/track-page-view`, {
+      await fetch(`${this.baseUrl}/analytics/track-page-view`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -132,7 +132,7 @@ class AnalyticsService {
    */
   async trackInteraction(type: string, element?: string, value?: string, metadata?: any) {
     try {
-      const response = await fetch(`${this.baseUrl}/api/analytics/track-interaction`, {
+      const response = await fetch(`${this.baseUrl}/analytics/track-interaction`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

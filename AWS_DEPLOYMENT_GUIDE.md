@@ -37,10 +37,11 @@ EMAIL_USER="your-email@gmail.com"
 EMAIL_PASS="your-app-password"
 EMAIL_FROM="noreply@dhokabeatz.com"
 
-# Cloudinary
-CLOUDINARY_CLOUD_NAME="your-cloudinary-cloud-name"
-CLOUDINARY_API_KEY="your-cloudinary-api-key"
-CLOUDINARY_API_SECRET="your-cloudinary-api-secret"
+# AWS S3
+AWS_REGION="us-east-1"
+AWS_ACCESS_KEY_ID="your-aws-access-key-id"
+AWS_SECRET_ACCESS_KEY="your-aws-secret-access-key"
+AWS_S3_BUCKET_NAME="your-portfolio-bucket-name"
 
 # Paystack
 PAYSTACK_SECRET_KEY="your-paystack-secret-key"
@@ -63,6 +64,7 @@ npm run deploy:prod
 ```
 
 This will:
+
 - Build the NestJS application
 - Deploy to AWS Lambda
 - Create API Gateway endpoints
@@ -194,16 +196,19 @@ aws route53 change-resource-record-sets \
 Add these secrets to your GitHub repository settings:
 
 **AWS Credentials:**
+
 - `AWS_ACCESS_KEY_ID`
 - `AWS_SECRET_ACCESS_KEY`
 - `AWS_REGION` (e.g., `us-east-1`)
 
 **Backend Environment Variables:**
+
 - `DATABASE_URL`
 - `JWT_SECRET`
-- `CLOUDINARY_CLOUD_NAME`
-- `CLOUDINARY_API_KEY`
-- `CLOUDINARY_API_SECRET`
+- `AWS_REGION`
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+- `AWS_S3_BUCKET_NAME`
 - `EMAIL_HOST`
 - `EMAIL_PORT`
 - `EMAIL_USER`
@@ -212,6 +217,7 @@ Add these secrets to your GitHub repository settings:
 - `PAYSTACK_SECRET_KEY`
 
 **Frontend Configuration:**
+
 - `VITE_API_URL` (your API Gateway URL)
 - `CLOUDFRONT_DISTRIBUTION_ID`
 

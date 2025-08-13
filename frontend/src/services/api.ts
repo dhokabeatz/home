@@ -506,12 +506,14 @@ export interface UpdateServiceData extends Partial<CreateServiceData> { }
 
 // API Service Class
 class ApiService {
-  private getAuthHeaders(): HeadersInit {
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      // No authorization header needed - cookies are sent automatically
-    };
+  private getAuthHeaders(includeContentType: boolean = true): HeadersInit {
+    const headers: Record<string, string> = {};
 
+    if (includeContentType) {
+      headers['Content-Type'] = 'application/json';
+    }
+
+    // No authorization header needed - cookies are sent automatically
     return headers;
   }
 
@@ -1033,14 +1035,14 @@ class ApiService {
   // Upload endpoints
   async generateUploadSignature(data: {
     filename: string;
+    contentType: string;
     folder?: string;
   }): Promise<{
-    signature: string;
-    timestamp: number;
-    cloudName: string;
-    apiKey: string;
-    folder: string;
-    publicId: string;
+    presignedUrl: string;
+    fields: Record<string, string>;
+    key: string;
+    bucket: string;
+    url: string;
   }> {
     const response = await fetch(`${API_BASE_URL}/upload/signature`, {
       method: 'POST',
@@ -1052,41 +1054,36 @@ class ApiService {
     return this.handleResponse(response);
   }
 
-  async uploadToCloudinary(file: File, uploadData: {
-    signature: string;
-    timestamp: number;
-    cloudName: string;
-    apiKey: string;
-    folder: string;
-    publicId: string;
+  async uploadToS3(file: File, uploadData: {
+    presignedUrl: string;
+    fields: Record<string, string>;
+    key: string;
+    bucket: string;
+    url: string;
   }): Promise<{ url: string; secureUrl: string; publicId: string }> {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('api_key', uploadData.apiKey);
-    formData.append('timestamp', uploadData.timestamp.toString());
-    formData.append('signature', uploadData.signature);
-    formData.append('folder', uploadData.folder);
-    formData.append('public_id', uploadData.publicId);
-
-    const response = await fetch(`https://api.cloudinary.com/v1_1/${uploadData.cloudName}/image/upload`, {
-      method: 'POST',
-      body: formData,
+    // Upload directly to S3 using presigned URL
+    const response = await fetch(uploadData.presignedUrl, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': file.type,
+        ...uploadData.fields,
+      },
+      body: file,
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(`Failed to upload to Cloudinary: ${errorData.error?.message || response.status}`);
+      const errorText = await response.text().catch(() => '');
+      throw new Error(`Failed to upload to S3: ${response.status} ${errorText}`);
     }
 
-    const result = await response.json();
     return {
-      url: result.url,
-      secureUrl: result.secure_url,
-      publicId: result.public_id,
+      url: uploadData.url,
+      secureUrl: uploadData.url, // S3 URLs are always HTTPS
+      publicId: uploadData.key, // Use S3 key as publicId
     };
   }
 
-  async directUploadToCloudinary(file: File, folder: string = 'portfolio'): Promise<{ url: string; secureUrl: string; publicId: string }> {
+  async directUploadToS3(file: File, folder: string = 'portfolio'): Promise<{ url: string; secureUrl: string; publicId: string }> {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('folder', folder);
@@ -1095,6 +1092,7 @@ class ApiService {
       method: 'POST',
       headers: {
         // Don't set Content-Type header for FormData, let browser set it
+        ...this.getAuthHeaders(false), // Don't include Content-Type
       },
       credentials: 'include',
       body: formData,
@@ -1118,7 +1116,7 @@ class ApiService {
   async uploadImage(file: File, folder: string = 'portfolio'): Promise<string> {
     try {
       // Option 1: Use direct upload (simpler)
-      const result = await this.directUploadToCloudinary(file, folder);
+      const result = await this.directUploadToS3(file, folder);
 
       // Confirm upload
       await this.confirmUpload(result.publicId, result.secureUrl);
@@ -1131,17 +1129,18 @@ class ApiService {
     }
   }
 
-  // Alternative method using signed upload (more secure)
+  // Alternative method using presigned URL (more secure for client-side uploads)
   async uploadImageSigned(file: File, folder: string = 'portfolio'): Promise<string> {
     try {
-      // Step 1: Generate upload signature
+      // Step 1: Generate presigned URL
       const uploadData = await this.generateUploadSignature({
         filename: file.name,
+        contentType: file.type,
         folder,
       });
 
-      // Step 2: Upload to Cloudinary
-      const result = await this.uploadToCloudinary(file, uploadData);
+      // Step 2: Upload to S3 using presigned URL
+      const result = await this.uploadToS3(file, uploadData);
 
       // Step 3: Confirm upload
       await this.confirmUpload(result.publicId, result.secureUrl);

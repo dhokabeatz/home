@@ -18,7 +18,13 @@ if [ ! -f ".env" ]; then
     echo "📝 Please update .env with your actual configuration"
 fi
 
-echo "🔨 Building application..."
+# Load environment variables from .env file
+echo "� Loading environment variables..."
+set -a
+source .env
+set +a
+
+echo "�🔨 Building application..."
 npm run build
 
 if [ $? -ne 0 ]; then
@@ -32,4 +38,4 @@ echo "📚 API docs will be available at http://localhost:4000/api/docs"
 echo ""
 echo "Press Ctrl+C to stop the server"
 
-npm run start:offline
+serverless offline
