@@ -1,0 +1,377 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String        @id @default(cuid())
+  email              String        @unique
+  name               String
+  password           String
+  role               Role          @default(ADMIN)
+  avatar             String?
+  bio                String?
+  location           String?
+  phone              String?
+  website            String?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  cvUrl              String?
+  clientSatisfaction Int           @default(100)
+  yearsExperience    Int           @default(3)
+  
+  // About section content URLs from Cloudinary
+  aboutHeading       String?       // About section heading text file URL
+  aboutSubtitle      String?       // About section subtitle text file URL  
+  aboutParagraph1    String?       // First main paragraph text file URL
+  aboutParagraph2    String?       // Second main paragraph text file URL
+  aboutImage         String?       // About section image URL from Cloudinary
+  
+  settings           UserSettings?
+  notifications      Notification[]
+
+  @@map("users")
+}
+
+model UserSettings {
+  id                   String   @id @default(cuid())
+  userId               String   @unique
+  emailNotifications   Boolean  @default(true)
+  browserNotifications Boolean  @default(false)
+  newContactMessages   Boolean  @default(true)
+  projectViews         Boolean  @default(false)
+  weeklyReports        Boolean  @default(true)
+  securityAlerts       Boolean  @default(true)
+  twoFactorEnabled     Boolean  @default(false)
+  loginAlerts          Boolean  @default(true)
+  passwordLastChanged  DateTime @default(now())
+  activeSessions       Int      @default(1)
+  maintenanceMode      Boolean  @default(false)
+  analyticsEnabled     Boolean  @default(true)
+  contactFormEnabled   Boolean  @default(true)
+  seoTitle             String   @default("Henry Agyemang - Full Stack Developer")
+  seoDescription       String   @default("Experienced full-stack developer specializing in React, Node.js, and cloud solutions.")
+  githubUrl            String?
+  linkedinUrl          String?
+  twitterUrl           String?
+  emailUrl             String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_settings")
+}
+
+model Project {
+  id          String              @id @default(cuid())
+  title       String
+  description String
+  longDesc    String?
+  demoUrl     String?
+  githubUrl   String?
+  status      ProjectStatus       @default(DRAFT)
+  isPaid      Boolean             @default(false)
+  price       Decimal?            // Price in the base currency (e.g., USD)
+  currency    String              @default("USD")
+  order       Int                 @default(0)
+  tags        String[]
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  screenshots ProjectScreenshot[]
+  purchases   ProjectPurchase[]
+
+  @@map("projects")
+}
+
+model ProjectScreenshot {
+  id        String  @id @default(cuid())
+  url       String
+  alt       String?
+  order     Int     @default(0)
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("project_screenshots")
+}
+
+model ProjectPurchase {
+  id                String            @id @default(cuid())
+  projectId         String
+  project           Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  customerEmail     String
+  customerName      String?
+  amount            Decimal
+  currency          String            @default("USD")
+  paystackReference String            @unique  // Paystack transaction reference
+  status            PaymentStatus     @default(PENDING)
+  paymentGateway    String            @default("paystack")
+  metadata          Json?             // Additional payment metadata
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@map("project_purchases")
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  icon        String
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("services")
+}
+
+model Skill {
+  id         String   @id @default(cuid())
+  name       String
+  percentage Int
+  category   String
+  color      String   @default("#3B82F6")
+  isActive   Boolean  @default(true)
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("skills")
+}
+
+model Technology {
+  id        String   @id @default(cuid())
+  name      String
+  isActive  Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("technologies")
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  name      String
+  role      String
+  bio       String
+  image     String
+  email     String
+  linkedin  String?
+  github    String?
+  isActive  Boolean  @default(true)
+  order     Int      @default(0)
+  joinDate  DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("team_members")
+}
+
+model ContactSubmission {
+  id          String        @id @default(cuid())
+  name        String
+  email       String
+  phone       String?
+  message     String
+  status      ContactStatus @default(UNREAD)
+  ipAddress   String
+  userAgent   String?
+  submittedAt DateTime      @default(now())
+
+  @@map("contact_submissions")
+}
+
+model MediaFile {
+  id           String   @id @default(cuid())
+  filename     String
+  originalName String
+  mimeType     String
+  size         Int
+  url          String
+  category     String?
+  uploadedAt   DateTime @default(now())
+
+  @@map("media_files")
+}
+
+model VisitEvent {
+  id        String   @id @default(cuid())
+  path      String
+  ipAddress String
+  userAgent String?
+  referer   String?
+  country   String?
+  device    String?
+  browser   String?
+  os        String?
+  sessionId String?
+  duration  Int?      // Duration in seconds
+  isUnique  Boolean   @default(false) // First time visitor
+  isBounce  Boolean   @default(false) // Left after one page
+  timestamp DateTime @default(now())
+
+  @@map("visit_events")
+}
+
+model VisitAggregate {
+  id          String   @id @default(cuid())
+  date        DateTime @db.Date
+  path        String?
+  visitors    Int      @default(0)
+  pageViews   Int      @default(0)
+  uniqueVisitors Int   @default(0)
+  avgDuration Float?   // Average session duration in seconds
+  bounceRate  Float?   // Percentage of single-page sessions
+  createdAt   DateTime @default(now())
+
+  @@unique([date, path])
+  @@map("visit_aggregates")
+}
+
+model TrafficSource {
+  id        String   @id @default(cuid())
+  date      DateTime @db.Date
+  source    String   // "direct", "search", "social", "referral", "campaign"
+  medium    String?  // "organic", "cpc", "social", "referral", "email"
+  campaign  String?  // Campaign name if applicable
+  visitors  Int      @default(0)
+  sessions  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@unique([date, source, medium, campaign])
+  @@map("traffic_sources")
+}
+
+model DeviceAnalytics {
+  id         String   @id @default(cuid())
+  date       DateTime @db.Date
+  deviceType String   // "desktop", "mobile", "tablet"
+  browser    String?
+  os         String?
+  visitors   Int      @default(0)
+  sessions   Int      @default(0)
+  bounceRate Float?
+  avgDuration Float?
+  createdAt  DateTime @default(now())
+
+  @@unique([date, deviceType, browser, os])
+  @@map("device_analytics")
+}
+
+model PageAnalytics {
+  id          String   @id @default(cuid())
+  date        DateTime @db.Date
+  path        String
+  title       String?
+  pageViews   Int      @default(0)
+  uniqueViews Int      @default(0)
+  avgTimeOnPage Float? // Average time in seconds
+  exitRate    Float?   // Percentage of exits from this page
+  bounceRate  Float?   // Percentage of bounces from this page
+  createdAt   DateTime @default(now())
+
+  @@unique([date, path])
+  @@map("page_analytics")
+}
+
+model UserInteraction {
+  id          String   @id @default(cuid())
+  sessionId   String
+  path        String
+  action      String   // "click", "download", "form_submit", "cta_click"
+  element     String?  // Element identifier (e.g., "download-cv", "contact-form")
+  value       String?  // Additional data (e.g., file name, form data)
+  timestamp   DateTime @default(now())
+
+  @@map("user_interactions")
+}
+
+model ConversionGoal {
+  id        String   @id @default(cuid())
+  name      String
+  type      String   // "contact_form", "cv_download", "project_view", "cta_click"
+  value     String?  // Target value/identifier
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  events    ConversionEvent[]
+
+  @@map("conversion_goals")
+}
+
+model ConversionEvent {
+  id        String   @id @default(cuid())
+  goalId    String
+  sessionId String
+  path      String
+  value     Decimal? // Monetary value if applicable
+  timestamp DateTime @default(now())
+  goal      ConversionGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  @@map("conversion_events")
+}
+
+model SuspiciousIp {
+  id           String   @id @default(cuid())
+  ipAddress    String   @unique
+  reason       String
+  requestCount Int      @default(1)
+  lastSeen     DateTime @default(now())
+  createdAt    DateTime @default(now())
+
+  @@map("suspicious_ips")
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  type      NotificationType @default(INFO)
+  isRead    Boolean          @default(false)
+  actionUrl String?
+  metadata  Json?
+  createdAt DateTime         @default(now())
+  readAt    DateTime?
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum ProjectStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ContactStatus {
+  UNREAD
+  READ
+  ARCHIVED
+}
+
+enum NotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+  CONTACT
+  SYSTEM
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+  CANCELLED
+}

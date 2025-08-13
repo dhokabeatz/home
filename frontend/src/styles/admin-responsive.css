@@ -1,0 +1,138 @@
+/* Admin Dashboard Responsive Utilities */
+
+/* Ensure consistent max-width for admin pages */
+.admin-container {
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+/* Fix for very long text in tables */
+.table-cell-truncate {
+  max-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Responsive chart containers */
+.chart-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Better responsive grid for cards */
+.responsive-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Ensure minimum heights for empty states */
+.empty-state-container {
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+}
+
+/* Fix for small screen navigation */
+@media (max-width: 640px) {
+  .admin-header {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 1rem;
+  }
+
+  .admin-controls {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .admin-select {
+    width: 100%;
+  }
+
+  .admin-button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Table responsive fixes */
+@media (max-width: 768px) {
+  .responsive-table {
+    font-size: 0.875rem;
+  }
+
+  .responsive-table th,
+  .responsive-table td {
+    padding: 0.5rem;
+  }
+
+  .hide-mobile {
+    display: none;
+  }
+}
+
+/* Chart responsive adjustments */
+.recharts-wrapper {
+  width: 100% !important;
+}
+
+/* Fix for pie chart labels on small screens */
+@media (max-width: 640px) {
+  .recharts-pie-label-text {
+    font-size: 12px !important;
+  }
+}
+
+/* Loading state improvements */
+.loading-spinner {
+  border-top-color: transparent;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Better focus states for accessibility */
+.admin-focusable:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Ensure analytics cards stack properly */
+.analytics-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .analytics-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .analytics-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Better spacing for dashboard sections */
+.dashboard-section {
+  margin-bottom: 2rem;
+}
+
+@media (min-width: 768px) {
+  .dashboard-section {
+    margin-bottom: 2.5rem;
+  }
+}

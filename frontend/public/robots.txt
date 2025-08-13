@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# Disallow admin routes for security
+Disallow: /admin/*
+
+# Allow crawling of main portfolio sections
+Allow: /projects
+Allow: /about
+Allow: /contact
+Allow: /services
+
+# Sitemap location
+Sitemap: https://henryduahagyemang.com/sitemap.xml
+
+# Crawl delay (optional)
+Crawl-delay: 1

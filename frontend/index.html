@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="/favicon.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Preconnect to external domains for faster loading -->
+  <link rel="preconnect" href="https://res.cloudinary.com">
+  <link rel="dns-prefetch" href="https://res.cloudinary.com">
+
+  <!-- Critical CSS inline for better FCP -->
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to bottom right, #f9fafb, #f3f4f6);
+      color: #111827;
+    }
+
+    #root {
+      min-height: 100vh;
+    }
+
+    /* Loading shell styles */
+    .loading-shell {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      background: linear-gradient(to bottom right, #f9fafb, #f3f4f6);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header-shell {
+      height: 64px;
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+    }
+
+    .hero-shell {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .content-shell {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      max-width: 1200px;
+      width: 100%;
+    }
+
+    .text-shell {
+      flex: 1;
+    }
+
+    .image-shell {
+      width: 384px;
+      height: 384px;
+      border-radius: 50%;
+      background: linear-gradient(45deg, #e5e7eb, #f3f4f6);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Shimmer animation */
+    .shimmer {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(90deg, #f0f0f0 25%, transparent 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: -200% 0;
+      }
+      100% {
+        background-position: 200% 0;
+      }
+    }
+
+    .text-line {
+      height: 1.5rem;
+      margin: 0.5rem 0;
+      border-radius: 4px;
+    }
+
+    .text-line.title {
+      height: 3rem;
+      width: 80%;
+    }
+
+    .text-line.subtitle {
+      height: 2rem;
+      width: 60%;
+    }
+
+    .text-line.description {
+      width: 90%;
+    }
+
+    /* Hide loading shell when React takes over */
+    .loading-shell.hidden {
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+  </style>
+
+  <title>Portfolio</title>
+  <meta name="description" content="Henry Agyemang Portfolio">
+</head>
+
+<body>
+  <div id="root">
+    <!-- Immediate loading shell for instant rendering -->
+    <div class="loading-shell" id="loading-shell">
+      <div class="header-shell"></div>
+      <div class="hero-shell">
+        <div class="content-shell">
+          <div class="text-shell">
+            <div class="text-line title shimmer"></div>
+            <div class="text-line subtitle shimmer"></div>
+            <div class="text-line description shimmer"></div>
+            <div class="text-line description shimmer"></div>
+          </div>
+          <div class="image-shell shimmer"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
+</html>
