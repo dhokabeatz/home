@@ -3,41 +3,32 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id                 String        @id @default(cuid())
-  email              String        @unique
-  name               String
-  password           String
-  role               Role          @default(ADMIN)
-  avatar             String?
-  bio                String?
-  location           String?
-  phone              String?
-  website            String?
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime      @updatedAt
-  cvUrl              String?
-  clientSatisfaction Int           @default(100)
-  yearsExperience    Int           @default(3)
-  
-  // About section content URLs from Cloudinary
-  aboutHeading       String?       // About section heading text file URL
-  aboutSubtitle      String?       // About section subtitle text file URL  
-  aboutParagraph1    String?       // First main paragraph text file URL
-  aboutParagraph2    String?       // Second main paragraph text file URL
-  aboutImage         String?       // About section image URL from Cloudinary
-  
-  settings           UserSettings?
-  notifications      Notification[]
+  id          String   @id @default(cuid())
+  email       String   @unique
+  password    String
+  firstName   String
+  lastName    String
+  role        String   @default("USER") // "ADMIN" or "USER"
+  isActive    Boolean  @default(true)
+  cvUrl       String?
+  phone       String?
+  location    String?
+  lastLogin   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  contacts      Contact[]
+  notifications Notification[]
+  purchases     ProjectPurchase[]
+  settings      UserSettings?
 
   @@map("users")
-}
-
-model UserSettings {
+}model UserSettings {
   id                   String   @id @default(cuid())
   userId               String   @unique
   emailNotifications   Boolean  @default(true)
@@ -67,22 +58,27 @@ model UserSettings {
 }
 
 model Project {
-  id          String              @id @default(cuid())
-  title       String
-  description String
-  longDesc    String?
-  demoUrl     String?
-  githubUrl   String?
-  status      ProjectStatus       @default(DRAFT)
-  isPaid      Boolean             @default(false)
-  price       Decimal?            // Price in the base currency (e.g., USD)
-  currency    String              @default("USD")
-  order       Int                 @default(0)
-  tags        String[]
-  createdAt   DateTime            @default(now())
-  updatedAt   DateTime            @updatedAt
-  screenshots ProjectScreenshot[]
-  purchases   ProjectPurchase[]
+  id              String   @id @default(cuid())
+  title           String
+  description     String
+  content         String?
+  imageUrl        String?
+  githubUrl       String?
+  liveUrl         String?
+  tags            String?  // JSON string array
+  status          String   @default("DRAFT") // "DRAFT", "PUBLISHED", "ARCHIVED"
+  featured        Boolean  @default(false)
+  order           Int      @default(0)
+  views           Int      @default(0)
+  likes           Int      @default(0)
+  downloads       Int      @default(0)
+  completionDate  DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  technologies Technology[]
+  purchases    ProjectPurchase[]
+  screenshots  ProjectScreenshot[]
 
   @@map("projects")
 }
@@ -99,19 +95,19 @@ model ProjectScreenshot {
 }
 
 model ProjectPurchase {
-  id                String            @id @default(cuid())
-  projectId         String
-  project           Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  customerEmail     String
-  customerName      String?
-  amount            Decimal
-  currency          String            @default("USD")
-  paystackReference String            @unique  // Paystack transaction reference
-  status            PaymentStatus     @default(PENDING)
-  paymentGateway    String            @default("paystack")
-  metadata          Json?             // Additional payment metadata
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
+  id             String   @id @default(cuid())
+  amount         Float
+  currency       String   @default("GHS")
+  status         String   @default("PENDING") // "PENDING", "COMPLETED", "FAILED", "REFUNDED", "CANCELLED"
+  paymentGateway String   @default("paystack")
+  metadata       String?  // JSON string for additional payment metadata
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
 
   @@map("project_purchases")
 }
@@ -151,6 +147,8 @@ model Technology {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  projects Project[]
+
   @@map("technologies")
 }
 
@@ -172,18 +170,24 @@ model TeamMember {
   @@map("team_members")
 }
 
-model ContactSubmission {
-  id          String        @id @default(cuid())
-  name        String
+model Contact {
+  id          String   @id @default(cuid())
+  firstName   String
+  lastName    String
   email       String
-  phone       String?
+  subject     String
   message     String
-  status      ContactStatus @default(UNREAD)
-  ipAddress   String
+  status      String   @default("UNREAD") // "UNREAD", "READ", "ARCHIVED"
+  ipAddress   String?
   userAgent   String?
-  submittedAt DateTime      @default(now())
+  referrer    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  @@map("contact_submissions")
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId String?
+
+  @@map("contacts")
 }
 
 model MediaFile {
@@ -220,7 +224,7 @@ model VisitEvent {
 
 model VisitAggregate {
   id          String   @id @default(cuid())
-  date        DateTime @db.Date
+  date        DateTime
   path        String?
   visitors    Int      @default(0)
   pageViews   Int      @default(0)
@@ -235,7 +239,7 @@ model VisitAggregate {
 
 model TrafficSource {
   id        String   @id @default(cuid())
-  date      DateTime @db.Date
+  date      DateTime
   source    String   // "direct", "search", "social", "referral", "campaign"
   medium    String?  // "organic", "cpc", "social", "referral", "email"
   campaign  String?  // Campaign name if applicable
@@ -249,7 +253,7 @@ model TrafficSource {
 
 model DeviceAnalytics {
   id         String   @id @default(cuid())
-  date       DateTime @db.Date
+  date       DateTime
   deviceType String   // "desktop", "mobile", "tablet"
   browser    String?
   os         String?
@@ -265,7 +269,7 @@ model DeviceAnalytics {
 
 model PageAnalytics {
   id          String   @id @default(cuid())
-  date        DateTime @db.Date
+  date        DateTime
   path        String
   title       String?
   pageViews   Int      @default(0)
@@ -327,51 +331,19 @@ model SuspiciousIp {
 }
 
 model Notification {
-  id        String           @id @default(cuid())
+  id        String   @id @default(cuid())
   userId    String
   title     String
   message   String
-  type      NotificationType @default(INFO)
-  isRead    Boolean          @default(false)
+  type      String   @default("INFO") // "INFO", "SUCCESS", "WARNING", "ERROR", "CONTACT", "SYSTEM"
+  isRead    Boolean  @default(false)
   actionUrl String?
-  metadata  Json?
-  createdAt DateTime         @default(now())
+  metadata  String?  // JSON string
+  createdAt DateTime @default(now())
   readAt    DateTime?
-  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notifications")
 }
 
-enum Role {
-  ADMIN
-  USER
-}
-
-enum ProjectStatus {
-  DRAFT
-  PUBLISHED
-  ARCHIVED
-}
-
-enum ContactStatus {
-  UNREAD
-  READ
-  ARCHIVED
-}
-
-enum NotificationType {
-  INFO
-  SUCCESS
-  WARNING
-  ERROR
-  CONTACT
-  SYSTEM
-}
-
-enum PaymentStatus {
-  PENDING
-  COMPLETED
-  FAILED
-  REFUNDED
-  CANCELLED
-}
+// SQLite doesn't support enums - using string constants instead

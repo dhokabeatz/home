@@ -11,7 +11,7 @@ provider:
   timeout: 30
   environment:
     NODE_ENV: ${self:provider.stage}
-    DATABASE_URL: ${env:DATABASE_URL, 'postgresql://localhost:5432/portfolio'}
+    DATABASE_URL: ${env:DATABASE_URL, 'file:./prod.db'}
     JWT_SECRET: ${env:JWT_SECRET, 'default-jwt-secret'}
     AWS_REGION: ${env:AWS_REGION, 'us-east-1'}
     # AWS credentials are optional if using IAM roles in Lambda

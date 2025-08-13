@@ -31,7 +31,7 @@ async function main() {
       title: 'E-Commerce Platform',
       description: 'Full-stack e-commerce solution with React, Node.js, and Stripe integration.',
       longDesc: 'A comprehensive e-commerce platform built with modern technologies. Features include user authentication, product catalog, shopping cart, payment processing with Stripe, and admin dashboard for managing products and orders.',
-      tags: ['React', 'Node.js', 'MongoDB', 'Stripe'],
+      tags: JSON.stringify(['React', 'Node.js', 'MongoDB', 'Stripe']), // SQLite compatibility
       status: 'PUBLISHED',
       demoUrl: 'https://demo.example.com',
       githubUrl: 'https://github.com/henryagyemang/ecommerce',
@@ -48,7 +48,7 @@ async function main() {
       title: 'Task Management App',
       description: 'Collaborative task management application with real-time updates.',
       longDesc: 'A modern task management application that enables teams to collaborate effectively. Features real-time updates, drag-and-drop task organization, user assignments, and progress tracking.',
-      tags: ['React', 'Socket.io', 'Express', 'PostgreSQL'],
+      tags: JSON.stringify(['React', 'Socket.io', 'Express', 'PostgreSQL']), // SQLite compatibility
       status: 'DRAFT',
       demoUrl: 'https://tasks.example.com',
       githubUrl: 'https://github.com/henryagyemang/tasks',
