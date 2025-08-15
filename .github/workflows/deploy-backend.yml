@@ -12,7 +12,7 @@ on:
       - "backend/**"
 
 env:
-  AWS_REGION: eu-central-1
+  AWS_REGION: ${{ secrets.AWS_REGION }}
   NODE_VERSION: "18"
 
 jobs:
@@ -80,6 +80,17 @@ jobs:
 
       - name: Generate Prisma client
         run: npx prisma generate
+
+      - name: Prepare production database
+        run: |
+          # Copy dev database as production database for deployment
+          cp prisma/dev.db prisma/prod.db
+          # Ensure database is up to date with latest migrations
+          npx prisma migrate deploy
+          # Seed database with initial data if needed
+          npm run db:seed || echo "Seeding skipped or failed - continuing..."
+        env:
+          DATABASE_URL: "file:./prisma/prod.db"
 
       - name: Build application
         run: npm run build
