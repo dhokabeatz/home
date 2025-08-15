@@ -11,12 +11,12 @@ provider:
   region: ${opt:region, 'us-east-1'}
   stage: ${opt:stage, 'dev'}
   memorySize: 512
-  timeout: 30
+  timeout: 29  # API Gateway max timeout is 29 seconds
   environment:
     NODE_ENV: ${self:provider.stage}
     DATABASE_URL: ${env:DATABASE_URL, 'file:./prisma/prod.db'}
     JWT_SECRET: ${env:JWT_SECRET, 'default-jwt-secret'}
-    AWS_REGION: ${env:AWS_REGION, 'us-east-1'}
+    # AWS_REGION is automatically available in Lambda runtime, don't set it manually
     # AWS credentials are optional if using IAM roles in Lambda
     # AWS_ACCESS_KEY_ID: ${env:AWS_ACCESS_KEY_ID, ''}
     # AWS_SECRET_ACCESS_KEY: ${env:AWS_SECRET_ACCESS_KEY, ''}

@@ -16,7 +16,7 @@ export class UploadService {
   constructor(private readonly configService: ConfigService) {
     // Initialize S3 client configuration
     const s3Config: any = {
-      region: this.configService.get("AWS_REGION") || "us-east-1",
+      region: this.configService.get("AWS_DEFAULT_REGION") || this.configService.get("AWS_REGION") || "us-east-1",
     };
 
     // Check for AWS profile first
@@ -87,7 +87,8 @@ export class UploadService {
     });
 
     // Generate the public URL for the file
-    const publicUrl = `https://${this.bucketName}.s3.${this.configService.get("AWS_REGION") || "us-east-1"}.amazonaws.com/${key}`;
+    const region = this.configService.get("AWS_DEFAULT_REGION") || this.configService.get("AWS_REGION") || "us-east-1";
+    const publicUrl = `https://${this.bucketName}.s3.${region}.amazonaws.com/${key}`;
 
     return {
       presignedUrl,
@@ -152,7 +153,8 @@ export class UploadService {
       await this.s3Client.send(command);
 
       // Generate public URL
-      const url = `https://${this.bucketName}.s3.${this.configService.get("AWS_REGION") || "us-east-1"}.amazonaws.com/${key}`;
+      const region = this.configService.get("AWS_DEFAULT_REGION") || this.configService.get("AWS_REGION") || "us-east-1";
+      const url = `https://${this.bucketName}.s3.${region}.amazonaws.com/${key}`;
 
       return {
         publicId: key, // Use S3 key as publicId for consistency
