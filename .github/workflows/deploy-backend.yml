@@ -118,6 +118,18 @@ jobs:
             echo "Deployment bucket already exists: $DEPLOYMENT_BUCKET"
           fi
 
+      - name: Check package size before deployment
+        run: |
+          echo "📦 Checking deployment package contents and sizes..."
+          echo "📁 dist/ folder size:"
+          du -sh dist/
+          echo "📁 prisma/ folder size:" 
+          du -sh prisma/
+          echo "📁 node_modules/.prisma/ size:"
+          du -sh node_modules/.prisma/ 2>/dev/null || echo "No .prisma folder"
+          echo "🔍 Largest node_modules folders:"
+          du -sh node_modules/* 2>/dev/null | sort -hr | head -20 || echo "Cannot list node_modules"
+
       - name: Deploy to AWS Lambda
         run: |
           serverless deploy --stage prod --region ${{ env.AWS_REGION }}
