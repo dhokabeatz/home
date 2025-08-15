@@ -2,6 +2,11 @@ service: ing-henry-portfolio-backend
 
 frameworkVersion: "4"
 
+org: dhokabeatz
+app: portfolio-websitevice: ing-henry-portfolio-backend
+
+frameworkVersion: "4"
+
 provider:
   name: aws
   runtime: nodejs18.x
