@@ -66,6 +66,13 @@ build:
     external:
       - '@prisma/client'  # Keep as external dependency
       - 'prisma'
+      # NestJS optional/dynamic dependencies that don't need to be bundled
+      - '@nestjs/microservices'
+      - '@nestjs/microservices/microservices-module' 
+      - 'class-transformer/storage'
+      # Other potential NestJS optional dependencies
+      - '@nestjs/websockets/socket-module'
+      - '@nestjs/testing'
 
 custom:
     httpPort: 4000
