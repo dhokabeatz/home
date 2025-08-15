@@ -99,21 +99,38 @@ functions:
 
 package:
   exclude:
-    - node_modules/.prisma/client/libquery_engine-*
-    - "!node_modules/.prisma/client/libquery_engine-rhel-*"
-    - "!node_modules/.prisma/client/libquery_engine-debian-*"
-    - node_modules/@prisma/engines/**
+    # Source files (not needed in production)
     - "src/**"
-    - "test/**"
+    - "test/**" 
+    - "tests/**"
     - "logs/**"
     - ".env*"
     - "README.md"
     - ".gitignore"
     - "nest-cli.json"
     - "tsconfig*.json"
+    - "*.log"
+    - "coverage/**"
+    - ".nyc_output/**"
+    # Development dependencies (large packages)
+    - "node_modules/@types/**"
+    - "node_modules/typescript/**" 
+    - "node_modules/ts-node/**"
+    - "node_modules/jest/**"
+    - "node_modules/@jest/**"
+    - "node_modules/eslint/**"
+    - "node_modules/@typescript-eslint/**"
+    - "node_modules/prettier/**"
+    - "node_modules/@angular/**"
+    - "node_modules/@babel/**"
+    - "node_modules/webpack/**"
+    # Prisma engines (keep only Linux ones for Lambda)
+    - "node_modules/@prisma/engines/**"
+    - "node_modules/.prisma/client/libquery_engine-darwin*"
+    - "node_modules/.prisma/client/libquery_engine-windows*"
+    - "node_modules/.prisma/client/query_engine-*"
   include:
-    - dist/**
-    - node_modules/.prisma/**
-    - prisma/schema.prisma
-    - prisma/dev.db
-    - prisma/prod.db
+    - "dist/**"
+    - "node_modules/.prisma/**" 
+    - "prisma/schema.prisma"
+    - "prisma/dev.db"
