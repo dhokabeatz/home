@@ -94,6 +94,7 @@ package:
   exclude:
     - node_modules/.prisma/client/libquery_engine-*
     - "!node_modules/.prisma/client/libquery_engine-rhel-*"
+    - "!node_modules/.prisma/client/libquery_engine-debian-*"
     - node_modules/@prisma/engines/**
     - "src/**"
     - "test/**"
