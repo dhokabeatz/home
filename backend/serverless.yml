@@ -54,9 +54,18 @@ provider:
           Resource: arn:aws:s3:::${env:AWS_S3_BUCKET_NAME}
 
 plugins:
+  - serverless-webpack
   - serverless-offline
 
 custom:
+  webpack:
+    webpackConfig: ./webpack.config.js
+    includeModules:
+      forceExclude:
+        - aws-sdk  # AWS Lambda provides this
+      packagePath: './package.json'
+    packager: 'npm'
+    excludeFiles: src/**/*.spec.ts
   serverless-offline:
     httpPort: 4000
     lambdaPort: 3002
@@ -98,50 +107,18 @@ functions:
             allowCredentials: true
 
 package:
+  # With webpack, we only need to exclude a few things
   exclude:
-    # Source and build files
     - "src/**"
     - "test/**"
     - "tests/**"
     - "logs/**"
-    - "coverage/**"
-    - ".nyc_output/**"
     - ".env*"
     - "README.md"
     - ".gitignore"
     - "nest-cli.json"
     - "tsconfig*.json"
-    - "*.log"
-    # Large development node_modules that aren't needed
-    - "node_modules/@types/**"
-    - "node_modules/typescript/**" 
-    - "node_modules/ts-node/**"
-    - "node_modules/jest/**"
-    - "node_modules/@jest/**"
-    - "node_modules/eslint/**"
-    - "node_modules/@typescript-eslint/**"
-    - "node_modules/prettier/**"
-    - "node_modules/@nestjs/cli/**"
-    - "node_modules/@nestjs/schematics/**"
-    - "node_modules/@nestjs/testing/**"
-    - "node_modules/serverless/**"
-    - "node_modules/serverless-offline/**"
-    # Large runtime dependencies we might not need
-    - "node_modules/swagger-ui-dist/**"
-    - "node_modules/@nestjs/swagger/**"
-    - "node_modules/socket.io/**"
-    - "node_modules/socket.io-client/**"
-    - "node_modules/@nestjs/websockets/**"
-    - "node_modules/@nestjs/platform-socket.io/**"
-    - "node_modules/redis/**"
-    - "node_modules/cache-manager-redis-store/**"
-    # Non-Linux Prisma engines
-    - "node_modules/@prisma/engines/**"
-    - "node_modules/.prisma/client/libquery_engine-darwin*"
-    - "node_modules/.prisma/client/libquery_engine-windows*"
-    - "node_modules/.prisma/client/query_engine-*"
+    - "webpack.config.js"
   include:
-    - "dist/**"
-    - "node_modules/.prisma/**"
     - "prisma/schema.prisma"
     - "prisma/dev.db"
