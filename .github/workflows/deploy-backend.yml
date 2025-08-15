@@ -105,6 +105,19 @@ jobs:
       - name: Install Serverless Framework
         run: npm install -g serverless@4
 
+      - name: Create Serverless deployment bucket if not exists
+        run: |
+          DEPLOYMENT_BUCKET="${{ secrets.AWS_S3_BUCKET_NAME }}-serverless-deployments"
+          if ! aws s3 ls "s3://$DEPLOYMENT_BUCKET" 2>/dev/null; then
+            echo "Creating deployment bucket: $DEPLOYMENT_BUCKET"
+            aws s3 mb "s3://$DEPLOYMENT_BUCKET" --region ${{ env.AWS_REGION }}
+            aws s3api put-bucket-encryption \
+              --bucket "$DEPLOYMENT_BUCKET" \
+              --server-side-encryption-configuration '{"Rules":[{"ApplyServerSideEncryptionByDefault":{"SSEAlgorithm":"AES256"}}]}'
+          else
+            echo "Deployment bucket already exists: $DEPLOYMENT_BUCKET"
+          fi
+
       - name: Deploy to AWS Lambda
         run: |
           serverless deploy --stage prod --region ${{ env.AWS_REGION }}

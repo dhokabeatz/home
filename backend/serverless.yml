@@ -29,6 +29,10 @@ provider:
     PAYSTACK_SECRET_KEY: ${env:PAYSTACK_SECRET_KEY, ''}
     FRONTEND_URL: ${env:FRONTEND_URL, 'https://dhokabeatz.com'}
 
+  deploymentBucket:
+    name: ${env:AWS_S3_BUCKET_NAME}-serverless-deployments
+    serverSideEncryption: AES256
+
   iam:
     role:
       statements:
