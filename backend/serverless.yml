@@ -54,19 +54,20 @@ provider:
           Resource: arn:aws:s3:::${env:AWS_S3_BUCKET_NAME}
 
 plugins:
-  - serverless-webpack
   - serverless-offline
 
+build:
+  esbuild:
+    bundle: true
+    minify: true
+    target: node18
+    exclude:
+      - aws-sdk  # Provided by Lambda runtime
+    external:
+      - '@prisma/client'  # Keep as external dependency
+      - 'prisma'
+
 custom:
-  webpack:
-    webpackConfig: ./webpack.config.js
-    includeModules:
-      forceExclude:
-        - aws-sdk  # AWS Lambda provides this
-      packagePath: './package.json'
-    packager: 'npm'
-    excludeFiles: src/**/*.spec.ts
-  serverless-offline:
     httpPort: 4000
     lambdaPort: 3002
     websocketPort: 3001
