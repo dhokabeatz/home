@@ -12,8 +12,8 @@ on:
       - "frontend/**"
 
 env:
-  AWS_REGION: us-east-1
-  S3_BUCKET_NAME: dhokabeatz-portfolio
+  AWS_REGION: eu-central-1
+  S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
   CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
 
 jobs:
@@ -48,7 +48,7 @@ jobs:
         run: npm run build
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
-          VITE_APP_NAME: "Ing. Henry Portfolio"
+          VITE_APP_NAME: ${{ secrets.VITE_APP_NAME }}
           VITE_NODE_ENV: production
 
       - name: Configure AWS credentials
@@ -112,7 +112,7 @@ jobs:
         run: |
           echo "🚀 Frontend deployed successfully!"
           echo "📦 S3 Bucket: s3://${{ env.S3_BUCKET_NAME }}"
-          echo "🌐 Website URL: https://dhokabeatz.com"
+          echo "🌐 Website URL: ${{ secrets.WEBSITE_URL }}"
           if [ -n "${{ env.CLOUDFRONT_DISTRIBUTION_ID }}" ]; then
             echo "🔄 CloudFront invalidation created"
           fi

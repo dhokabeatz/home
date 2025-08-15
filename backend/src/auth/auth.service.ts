@@ -1,9 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
-import * as bcrypt from 'bcryptjs';
+import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
+import { ConfigService } from "@nestjs/config";
+import * as bcrypt from "bcryptjs";
 
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from "../prisma/prisma.service";
 
 @Injectable()
 export class AuthService {
@@ -18,8 +18,9 @@ export class AuthService {
       where: { email },
     });
 
-    if (user && await bcrypt.compare(password, user.password)) {
-      const { password, ...result } = user;
+    if (user && (await bcrypt.compare(password, user.password))) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password: _, ...result } = user;
       return result;
     }
     return null;
@@ -31,7 +32,7 @@ export class AuthService {
 
     return {
       access_token: this.jwtService.sign(payload),
-      refresh_token: this.jwtService.sign(refreshPayload, { expiresIn: '7d' }),
+      refresh_token: this.jwtService.sign(refreshPayload, { expiresIn: "7d" }),
       user: {
         id: user.id,
         email: user.email,
@@ -48,7 +49,7 @@ export class AuthService {
       });
 
       if (!user) {
-        throw new UnauthorizedException('Invalid refresh token');
+        throw new UnauthorizedException("Invalid refresh token");
       }
 
       const accessPayload = { email: user.email, sub: user.id };
@@ -56,7 +57,9 @@ export class AuthService {
 
       return {
         access_token: this.jwtService.sign(accessPayload),
-        refresh_token: this.jwtService.sign(refreshPayload, { expiresIn: '7d' }),
+        refresh_token: this.jwtService.sign(refreshPayload, {
+          expiresIn: "7d",
+        }),
         user: {
           id: user.id,
           email: user.email,
@@ -64,8 +67,8 @@ export class AuthService {
         },
       };
     } catch (error) {
-      console.error('Error during refreshToken:', error);
-      throw new UnauthorizedException('Invalid refresh token');
+      console.error("Error during refreshToken:", error);
+      throw new UnauthorizedException("Invalid refresh token");
     }
   }
 }

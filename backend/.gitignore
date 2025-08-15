@@ -27,7 +27,6 @@ coverage
 bower_components
 
 # node-wjs addon build
-/src
 
 # Optional npm cache directory
 .npm

@@ -12,10 +12,10 @@ async function main() {
     update: {},
     create: {
       email: 'admin@henry.com',
-      name: 'Henry Agyemang',
+      firstName: 'Henry',
+      lastName: 'Agyemang',
       password: hashedPassword,
       role: 'ADMIN',
-      bio: 'Portfolio Administrator',
       location: 'Ghana',
     },
   });
@@ -30,12 +30,12 @@ async function main() {
       id: '1',
       title: 'E-Commerce Platform',
       description: 'Full-stack e-commerce solution with React, Node.js, and Stripe integration.',
-      longDesc: 'A comprehensive e-commerce platform built with modern technologies. Features include user authentication, product catalog, shopping cart, payment processing with Stripe, and admin dashboard for managing products and orders.',
+      content: 'A comprehensive e-commerce platform built with modern technologies. Features include user authentication, product catalog, shopping cart, payment processing with Stripe, and admin dashboard for managing products and orders.',
       tags: JSON.stringify(['React', 'Node.js', 'MongoDB', 'Stripe']), // SQLite compatibility
       status: 'PUBLISHED',
-      demoUrl: 'https://demo.example.com',
+      liveUrl: 'https://demo.example.com',
       githubUrl: 'https://github.com/henryagyemang/ecommerce',
-      isPaid: false,
+      featured: false,
       order: 1,
     },
   });
@@ -47,12 +47,12 @@ async function main() {
       id: '2',
       title: 'Task Management App',
       description: 'Collaborative task management application with real-time updates.',
-      longDesc: 'A modern task management application that enables teams to collaborate effectively. Features real-time updates, drag-and-drop task organization, user assignments, and progress tracking.',
-      tags: JSON.stringify(['React', 'Socket.io', 'Express', 'PostgreSQL']), // SQLite compatibility
+      content: 'A modern task management application that enables teams to collaborate effectively. Features real-time updates, drag-and-drop task organization, user assignments, and progress tracking.',
+      tags: JSON.stringify(['React', 'Socket.io', 'Express', 'SQLite']), // SQLite compatibility
       status: 'DRAFT',
-      demoUrl: 'https://tasks.example.com',
+      liveUrl: 'https://tasks.example.com',
       githubUrl: 'https://github.com/henryagyemang/tasks',
-      isPaid: true,
+      featured: true,
       order: 2,
     },
   });
@@ -127,7 +127,7 @@ async function main() {
     { name: 'Node.js/Express', percentage: 90, category: 'Backend', color: 'bg-green-500', isActive: true, order: 2 },
     { name: 'TypeScript', percentage: 88, category: 'Language', color: 'bg-blue-600', isActive: true, order: 3 },
     { name: 'Python/Django', percentage: 85, category: 'Backend', color: 'bg-yellow-500', isActive: true, order: 4 },
-    { name: 'PostgreSQL/MongoDB', percentage: 82, category: 'Database', color: 'bg-purple-500', isActive: true, order: 5 },
+    { name: 'SQLite/MongoDB', percentage: 82, category: 'Database', color: 'bg-purple-500', isActive: true, order: 5 },
     { name: 'AWS/Cloud', percentage: 80, category: 'DevOps', color: 'bg-orange-500', isActive: true, order: 6 },
     { name: 'Docker/Kubernetes', percentage: 75, category: 'DevOps', color: 'bg-cyan-500', isActive: true, order: 7 },
     { name: 'GraphQL', percentage: 70, category: 'API', color: 'bg-pink-500', isActive: false, order: 8 },
@@ -180,10 +180,10 @@ async function main() {
       type: 'CONTACT' as const,
       isRead: false,
       actionUrl: '/admin/contacts',
-      metadata: {
+      metadata: JSON.stringify({
         contactName: 'John Smith',
         contactEmail: 'john@example.com',
-      },
+      }),
     },
     {
       userId: adminUser.id,
@@ -260,27 +260,30 @@ async function main() {
   // Create some sample contact submissions
   const contacts = [
     {
-      name: 'John Smith',
+      firstName: 'John',
+      lastName: 'Smith',
       email: 'john.smith@example.com',
-      phone: '+1 (555) 123-4567',
+      subject: 'Web Development Project Inquiry',
       message: 'Hi Henry, I\'m interested in discussing a potential web development project for my startup. We\'re looking to build a modern e-commerce platform with React and Node.js. Could we schedule a call this week?',
       status: 'UNREAD' as const,
       ipAddress: '192.168.1.100',
       userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
     },
     {
-      name: 'Sarah Johnson',
+      firstName: 'Sarah',
+      lastName: 'Johnson',
       email: 'sarah@techcorp.com',
-      phone: '+1 (555) 987-6543',
+      subject: 'Dashboard Development Project',
       message: 'Hello! I came across your portfolio and I\'m very impressed with your work. We have a project that might be a great fit for your skills. It involves building a dashboard with real-time analytics.',
       status: 'READ' as const,
       ipAddress: '10.0.0.50',
       userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
     },
     {
-      name: 'Emily Rodriguez',
+      firstName: 'Emily',
+      lastName: 'Rodriguez',
       email: 'emily@designstudio.com',
-      phone: '+1 (555) 456-7890',
+      subject: 'Design Implementation Partnership',
       message: 'Hi there! Our design studio is looking for a developer to bring our client designs to life. We work with several high-profile brands and need someone who can deliver pixel-perfect implementations.',
       status: 'ARCHIVED' as const,
       ipAddress: '203.0.113.45',
@@ -289,7 +292,7 @@ async function main() {
   ];
 
   for (const contact of contacts) {
-    await prisma.contactSubmission.create({
+    await prisma.contact.create({
       data: contact,
     });
   }

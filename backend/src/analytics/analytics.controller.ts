@@ -9,37 +9,44 @@ import {
   BadRequestException,
   Ip,
   Headers,
-} from '@nestjs/common';
-import { AnalyticsService } from './analytics.service';
-import { AnalyticsCollectionService, VisitEventData } from './analytics-collection.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+} from "@nestjs/common";
+import { AnalyticsService } from "./analytics.service";
+import {
+  AnalyticsCollectionService,
+  VisitEventData,
+} from "./analytics-collection.service";
+import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 
 enum TimePeriod {
-  TODAY = 'today',
-  YESTERDAY = 'yesterday',
-  LAST_7_DAYS = 'last_7_days',
-  LAST_30_DAYS = 'last_30_days',
-  LAST_90_DAYS = 'last_90_days',
-  THIS_MONTH = 'this_month',
-  LAST_MONTH = 'last_month',
-  THIS_YEAR = 'this_year',
-  CUSTOM = 'custom',
+  TODAY = "today",
+  YESTERDAY = "yesterday",
+  LAST_7_DAYS = "last_7_days",
+  LAST_30_DAYS = "last_30_days",
+  LAST_90_DAYS = "last_90_days",
+  THIS_MONTH = "this_month",
+  LAST_MONTH = "last_month",
+  THIS_YEAR = "this_year",
+  CUSTOM = "custom",
 }
 
 enum GroupBy {
-  DAY = 'day',
-  WEEK = 'week',
-  MONTH = 'month',
+  DAY = "day",
+  WEEK = "week",
+  MONTH = "month",
 }
 
-@Controller('analytics')
+@Controller("analytics")
 export class AnalyticsController {
   constructor(
     private readonly analyticsService: AnalyticsService,
     private readonly analyticsCollectionService: AnalyticsCollectionService,
-  ) { }
+  ) {}
 
-  private getDateRange(period: TimePeriod, startDate?: string, endDate?: string) {
+  private getDateRange(
+    period: TimePeriod,
+    startDate?: string,
+    endDate?: string,
+  ) {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
@@ -83,8 +90,16 @@ export class AnalyticsController {
         };
 
       case TimePeriod.LAST_MONTH: {
-        const firstOfThisMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-        const firstOfLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+        const firstOfThisMonth = new Date(
+          today.getFullYear(),
+          today.getMonth(),
+          1,
+        );
+        const firstOfLastMonth = new Date(
+          today.getFullYear(),
+          today.getMonth() - 1,
+          1,
+        );
         return {
           start: firstOfLastMonth,
           end: new Date(firstOfThisMonth.getTime() - 1),
@@ -99,7 +114,9 @@ export class AnalyticsController {
 
       case TimePeriod.CUSTOM:
         if (!startDate || !endDate) {
-          throw new BadRequestException('Start date and end date are required for custom period');
+          throw new BadRequestException(
+            "Start date and end date are required for custom period",
+          );
         }
         return {
           start: new Date(startDate),
@@ -117,11 +134,11 @@ export class AnalyticsController {
   // ============= DATA COLLECTION ENDPOINTS =============
   // These endpoints are for collecting visitor data (not protected by auth)
 
-  @Post('track-visit')
+  @Post("track-visit")
   async trackVisit(
     @Body() data: { path: string; sessionId?: string; referer?: string },
     @Ip() ipAddress: string,
-    @Headers('user-agent') userAgent: string,
+    @Headers("user-agent") userAgent: string,
   ) {
     try {
       const visitData: VisitEventData = {
@@ -133,24 +150,31 @@ export class AnalyticsController {
         isUnique: true, // Will be validated in trackVisit method
       };
 
-      const result = await this.analyticsCollectionService.trackVisit(visitData);
+      const result =
+        await this.analyticsCollectionService.trackVisit(visitData);
 
       // Return success even if tracking was skipped (admin path or non-unique)
       return {
         success: true,
         id: result?.id || null,
-        tracked: result !== null
+        tracked: result !== null,
       };
     } catch (error) {
       return { success: false, error: error.message };
     }
   }
 
-  @Post('track-page-view')
+  @Post("track-page-view")
   async trackPageView(
-    @Body() data: { path: string; sessionId?: string; referer?: string; duration?: number },
+    @Body()
+    data: {
+      path: string;
+      sessionId?: string;
+      referer?: string;
+      duration?: number;
+    },
     @Ip() ipAddress: string,
-    @Headers('user-agent') userAgent: string,
+    @Headers("user-agent") userAgent: string,
   ) {
     try {
       const sessionData: Partial<VisitEventData> = {
@@ -161,22 +185,26 @@ export class AnalyticsController {
         duration: data.duration,
       };
 
-      const result = await this.analyticsCollectionService.trackPageView(data.path, sessionData);
+      const result = await this.analyticsCollectionService.trackPageView(
+        data.path,
+        sessionData,
+      );
 
       // Return success even if tracking was skipped (admin path or non-unique)
       return {
         success: true,
         id: result?.id || null,
-        tracked: result !== null
+        tracked: result !== null,
       };
     } catch (error) {
       return { success: false, error: error.message };
     }
   }
 
-  @Post('track-interaction')
+  @Post("track-interaction")
   async trackInteraction(
-    @Body() data: {
+    @Body()
+    data: {
       type: string;
       element?: string;
       value?: string;
@@ -185,7 +213,7 @@ export class AnalyticsController {
       path?: string;
     },
     @Ip() ipAddress: string,
-    @Headers('user-agent') userAgent: string,
+    @Headers("user-agent") userAgent: string,
   ) {
     try {
       const sessionData: Partial<VisitEventData> = {
@@ -210,7 +238,7 @@ export class AnalyticsController {
       return {
         success: true,
         id: result?.id || null,
-        tracked: result !== null
+        tracked: result !== null,
       };
     } catch (error) {
       return { success: false, error: error.message };
@@ -219,13 +247,13 @@ export class AnalyticsController {
 
   // ============= PROTECTED ANALYTICS ENDPOINTS =============
 
-  @Get('overview')
+  @Get("overview")
   @UseGuards(JwtAuthGuard)
   async getAnalyticsOverview(
-    @Query('period', new ParseEnumPipe(TimePeriod))
+    @Query("period", new ParseEnumPipe(TimePeriod))
     period: TimePeriod = TimePeriod.LAST_30_DAYS,
-    @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string,
+    @Query("startDate") startDate?: string,
+    @Query("endDate") endDate?: string,
   ) {
     const { start, end } = this.getDateRange(period, startDate, endDate);
 
@@ -248,10 +276,22 @@ export class AnalyticsController {
     return {
       ...overview,
       growth: {
-        visitors: calculateGrowth(overview.totalVisitors, previousOverview.totalVisitors),
-        pageViews: calculateGrowth(overview.totalPageViews, previousOverview.totalPageViews),
-        avgSessionDuration: calculateGrowth(overview.avgSessionDuration, previousOverview.avgSessionDuration),
-        bounceRate: calculateGrowth(overview.bounceRate, previousOverview.bounceRate),
+        visitors: calculateGrowth(
+          overview.totalVisitors,
+          previousOverview.totalVisitors,
+        ),
+        pageViews: calculateGrowth(
+          overview.totalPageViews,
+          previousOverview.totalPageViews,
+        ),
+        avgSessionDuration: calculateGrowth(
+          overview.avgSessionDuration,
+          previousOverview.avgSessionDuration,
+        ),
+        bounceRate: calculateGrowth(
+          overview.bounceRate,
+          previousOverview.bounceRate,
+        ),
       },
       period: {
         start: start.toISOString(),
@@ -261,88 +301,88 @@ export class AnalyticsController {
     };
   }
 
-  @Get('traffic-growth')
+  @Get("traffic-growth")
   @UseGuards(JwtAuthGuard)
   async getTrafficGrowthChart(
-    @Query('period', new ParseEnumPipe(TimePeriod))
+    @Query("period", new ParseEnumPipe(TimePeriod))
     period: TimePeriod = TimePeriod.LAST_30_DAYS,
-    @Query('groupBy', new ParseEnumPipe(GroupBy))
+    @Query("groupBy", new ParseEnumPipe(GroupBy))
     groupBy: GroupBy = GroupBy.DAY,
-    @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string,
+    @Query("startDate") startDate?: string,
+    @Query("endDate") endDate?: string,
   ) {
     const { start, end } = this.getDateRange(period, startDate, endDate);
     return this.analyticsService.getTrafficGrowthChart(start, end, groupBy);
   }
 
-  @Get('device-breakdown')
+  @Get("device-breakdown")
   @UseGuards(JwtAuthGuard)
   async getDeviceBreakdown(
-    @Query('period', new ParseEnumPipe(TimePeriod))
+    @Query("period", new ParseEnumPipe(TimePeriod))
     period: TimePeriod = TimePeriod.LAST_30_DAYS,
-    @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string,
+    @Query("startDate") startDate?: string,
+    @Query("endDate") endDate?: string,
   ) {
     const { start, end } = this.getDateRange(period, startDate, endDate);
     return this.analyticsService.getDeviceBreakdown(start, end);
   }
 
-  @Get('browser-stats')
+  @Get("browser-stats")
   @UseGuards(JwtAuthGuard)
   async getBrowserStats(
-    @Query('period', new ParseEnumPipe(TimePeriod))
+    @Query("period", new ParseEnumPipe(TimePeriod))
     period: TimePeriod = TimePeriod.LAST_30_DAYS,
-    @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string,
+    @Query("startDate") startDate?: string,
+    @Query("endDate") endDate?: string,
   ) {
     const { start, end } = this.getDateRange(period, startDate, endDate);
     return this.analyticsService.getBrowserStats(start, end);
   }
 
-  @Get('operating-systems')
+  @Get("operating-systems")
   @UseGuards(JwtAuthGuard)
   async getOperatingSystemStats(
-    @Query('period', new ParseEnumPipe(TimePeriod))
+    @Query("period", new ParseEnumPipe(TimePeriod))
     period: TimePeriod = TimePeriod.LAST_30_DAYS,
-    @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string,
+    @Query("startDate") startDate?: string,
+    @Query("endDate") endDate?: string,
   ) {
     const { start, end } = this.getDateRange(period, startDate, endDate);
     return this.analyticsService.getOperatingSystemStats(start, end);
   }
 
-  @Get('traffic-sources')
+  @Get("traffic-sources")
   @UseGuards(JwtAuthGuard)
   async getTrafficSources(
-    @Query('period', new ParseEnumPipe(TimePeriod))
+    @Query("period", new ParseEnumPipe(TimePeriod))
     period: TimePeriod = TimePeriod.LAST_30_DAYS,
-    @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string,
+    @Query("startDate") startDate?: string,
+    @Query("endDate") endDate?: string,
   ) {
     const { start, end } = this.getDateRange(period, startDate, endDate);
     return this.analyticsService.getTrafficSources(start, end);
   }
 
-  @Get('top-pages')
+  @Get("top-pages")
   @UseGuards(JwtAuthGuard)
   async getTopPages(
-    @Query('period', new ParseEnumPipe(TimePeriod))
+    @Query("period", new ParseEnumPipe(TimePeriod))
     period: TimePeriod = TimePeriod.LAST_30_DAYS,
-    @Query('limit') limit: number = 10,
-    @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string,
+    @Query("limit") limit: number = 10,
+    @Query("startDate") startDate?: string,
+    @Query("endDate") endDate?: string,
   ) {
     const { start, end } = this.getDateRange(period, startDate, endDate);
     return this.analyticsService.getTopPages(start, end, limit);
   }
 
-  @Get('comprehensive')
+  @Get("comprehensive")
   @UseGuards(JwtAuthGuard)
   async getComprehensiveAnalytics(
-    @Query('period', new ParseEnumPipe(TimePeriod))
+    @Query("period", new ParseEnumPipe(TimePeriod))
     period: TimePeriod = TimePeriod.LAST_30_DAYS,
-    @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string,
+    @Query("startDate") startDate?: string,
+    @Query("endDate") endDate?: string,
   ) {
     const { start, end } = this.getDateRange(period, startDate, endDate);
 

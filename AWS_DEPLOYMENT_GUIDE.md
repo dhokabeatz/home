@@ -13,7 +13,7 @@ This guide explains how to deploy the Ing. Henry Portfolio to AWS using S3, Clou
 
 - **Frontend**: React app hosted on S3, served via CloudFront CDN
 - **Backend**: NestJS API deployed to Lambda via API Gateway
-- **Database**: PostgreSQL (hosted externally, e.g., Neon, Supabase)
+- **Database**: SQLite (file-based, included with deployment)
 - **Domain**: Route 53 for DNS management
 - **SSL**: Certificate Manager for HTTPS
 
@@ -24,8 +24,8 @@ This guide explains how to deploy the Ing. Henry Portfolio to AWS using S3, Clou
 Create a `.env` file in the `backend` directory:
 
 ```bash
-# Database (use a cloud PostgreSQL service like Neon or Supabase)
-DATABASE_URL="postgresql://username:password@host:5432/database?sslmode=require"
+# Database (SQLite file-based - no external service needed)
+DATABASE_URL="file:./prod.db"
 
 # JWT Secret
 JWT_SECRET="your-super-secret-jwt-key-here"

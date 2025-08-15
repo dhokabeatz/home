@@ -55,22 +55,8 @@ export default function AdminSettings() {
       // Clean up empty strings to undefined for proper validation
       const updateData = {
         name: userProfile.name,
-        bio:
-          userProfile.bio && userProfile.bio.trim() !== ""
-            ? userProfile.bio
-            : undefined,
-        location:
-          userProfile.location && userProfile.location.trim() !== ""
-            ? userProfile.location
-            : undefined,
-        phone:
-          userProfile.phone && userProfile.phone.trim() !== ""
-            ? userProfile.phone
-            : undefined,
-        website:
-          userProfile.website && userProfile.website.trim() !== ""
-            ? userProfile.website
-            : undefined,
+        location: userProfile.location || "",
+        phone: userProfile.phone || "",
       };
 
       const updatedProfile = await apiService.updateUserProfile(updateData);
@@ -423,40 +409,6 @@ export default function AdminSettings() {
                       onChange={(e) => updateProfile("phone", e.target.value)}
                       placeholder="+233 24 123 4567"
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="website"
-                      className="block text-sm font-medium text-gray-700 mb-2"
-                    >
-                      Website
-                    </label>
-                    <input
-                      id="website"
-                      name="website"
-                      type="url"
-                      autoComplete="url"
-                      value={userProfile.website || ""}
-                      onChange={(e) => updateProfile("website", e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                    />
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <label
-                      htmlFor="bio"
-                      className="block text-sm font-medium text-gray-700 mb-2"
-                    >
-                      Bio
-                    </label>
-                    <textarea
-                      id="bio"
-                      rows={4}
-                      value={userProfile.bio || ""}
-                      onChange={(e) => updateProfile("bio", e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-none"
                     />
                   </div>
 

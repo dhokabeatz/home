@@ -15,6 +15,8 @@ model User {
   lastName    String
   role        String   @default("USER") // "ADMIN" or "USER"
   isActive    Boolean  @default(true)
+  avatar      String?
+  aboutImage  String?
   cvUrl       String?
   phone       String?
   location    String?
@@ -46,6 +48,10 @@ model User {
   contactFormEnabled   Boolean  @default(true)
   seoTitle             String   @default("Henry Agyemang - Full Stack Developer")
   seoDescription       String   @default("Experienced full-stack developer specializing in React, Node.js, and cloud solutions.")
+  aboutHeading         String   @default("About Me")
+  aboutSubtitle        String   @default("Full Stack Developer")
+  aboutParagraph1      String   @default("Welcome to my portfolio. I am a passionate developer with years of experience.")
+  aboutParagraph2      String   @default("I create amazing web applications using modern technologies and best practices.")
   githubUrl            String?
   linkedinUrl          String?
   twitterUrl           String?
@@ -61,13 +67,18 @@ model Project {
   id              String   @id @default(cuid())
   title           String
   description     String
+  longDesc        String?  // Long description for detailed project info
   content         String?
   imageUrl        String?
   githubUrl       String?
   liveUrl         String?
+  demoUrl         String?  // Demo/preview URL
   tags            String?  // JSON string array
   status          String   @default("DRAFT") // "DRAFT", "PUBLISHED", "ARCHIVED"
   featured        Boolean  @default(false)
+  isPaid          Boolean  @default(false)  // Whether this is a paid/premium project
+  currency        String?  // Currency for paid projects (e.g., "USD", "GHS")
+  price           Float?   // Price for paid projects
   order           Int      @default(0)
   views           Int      @default(0)
   likes           Int      @default(0)

@@ -41,8 +41,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       const profile = await apiService.getProfile();
       setUser(profile);
     } catch (error) {
-      // User not authenticated or session expired
-      console.log("Auth check failed - not authenticated:", error);
+      // User not authenticated or session expired - clear user state
       setUser(null);
     } finally {
       setIsLoading(false);

@@ -1,9 +1,9 @@
-import { Injectable, NotFoundException, Logger } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { EmailService } from '../common/email/email.service';
-import { CreateContactDto } from './dto/create-contact.dto';
-import { UpdateContactDto } from './dto/update-contact.dto';
-import { ContactQueryDto } from './dto/contact-query.dto';
+import { Injectable, NotFoundException, Logger } from "@nestjs/common";
+import { PrismaService } from "../prisma/prisma.service";
+import { EmailService } from "../common/email/email.service";
+import { CreateContactDto } from "./dto/create-contact.dto";
+import { UpdateContactDto } from "./dto/update-contact.dto";
+import { ContactQueryDto } from "./dto/contact-query.dto";
 
 @Injectable()
 export class ContactsService {
@@ -12,7 +12,7 @@ export class ContactsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly emailService: EmailService,
-  ) { }
+  ) {}
 
   async findAll(query: ContactQueryDto) {
     const { search, status, page = 1, limit = 10 } = query;
@@ -21,8 +21,8 @@ export class ContactsService {
       ...(status && { status }),
       ...(search && {
         OR: [
-          { name: { contains: search, mode: 'insensitive' as const } },
-          { email: { contains: search, mode: 'insensitive' as const } },
+          { name: { contains: search, mode: "insensitive" as const } },
+          { email: { contains: search, mode: "insensitive" as const } },
         ],
       }),
     };
@@ -30,7 +30,7 @@ export class ContactsService {
     const [contactsRaw, total] = await Promise.all([
       this.prisma.contact.findMany({
         where,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
         skip: (page - 1) * limit,
         take: limit,
       }),
@@ -38,7 +38,7 @@ export class ContactsService {
     ]);
 
     // Transform contacts to include combined name field
-    const contacts = contactsRaw.map(contact => ({
+    const contacts = contactsRaw.map((contact) => ({
       ...contact,
       name: `${contact.firstName} ${contact.lastName}`.trim(),
     }));
@@ -60,7 +60,7 @@ export class ContactsService {
     });
 
     if (!contact) {
-      throw new NotFoundException('Contact submission not found');
+      throw new NotFoundException("Contact submission not found");
     }
 
     // Transform contact to include combined name field
@@ -95,7 +95,7 @@ export class ContactsService {
         this.logger.log(`Email notifications sent for contact: ${contact.id}`);
       } catch (emailError) {
         // Log email error but don't fail the contact creation
-        this.logger.error('Failed to send email notifications:', emailError);
+        this.logger.error("Failed to send email notifications:", emailError);
       }
 
       // Return contact with combined name field
@@ -104,7 +104,7 @@ export class ContactsService {
         name: `${contact.firstName} ${contact.lastName}`.trim(),
       };
     } catch (error) {
-      this.logger.error('Failed to create contact:', error);
+      this.logger.error("Failed to create contact:", error);
       throw error;
     }
   }

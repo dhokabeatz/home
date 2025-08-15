@@ -15,13 +15,11 @@ const API_BASE_URL = getApiBaseUrl();
 // Types
 export interface User {
   id: string;
-  name: string;
+  name: string; // Combined firstName + lastName from backend  
   email: string;
   phone?: string;
   location?: string;
-  bio?: string;
   avatar?: string;
-  website?: string;
 }
 
 export interface PortfolioStats {
@@ -315,26 +313,21 @@ export interface UserSettings {
 export interface UserProfile {
   id: string;
   email: string;
-  name: string;
-  bio?: string;
+  name: string; // Combined firstName + lastName from backend
   location?: string;
   phone?: string;
-  website?: string;
   avatar?: string;
   cvUrl?: string;
+  aboutImage?: string;
   createdAt: string;
   updatedAt: string;
   settings?: UserSettings;
 }
 
 export interface UpdateUserProfileData {
-  name?: string;
-  bio?: string;
+  name?: string; // Will be split into firstName/lastName by backend
   location?: string;
   phone?: string;
-  website?: string;
-  avatar?: string;
-  cvUrl?: string;
 }
 
 export interface UpdateUserSettingsData {
@@ -1438,9 +1431,11 @@ class ApiService {
   }
 
   async verifyPayment(reference: string): Promise<PaymentVerificationResponse> {
-    const response = await fetch(`${API_BASE_URL}/payments/verify/${reference}`, {
+    const response = await fetch(`${API_BASE_URL}/payments/verify`, {
+      method: 'POST',
       headers: this.getAuthHeaders(),
       credentials: 'include',
+      body: JSON.stringify({ reference }),
     });
 
     return this.handleResponse(response);

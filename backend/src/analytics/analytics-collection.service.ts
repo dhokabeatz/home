@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "../prisma/prisma.service";
 
 export interface VisitEventData {
   path: string;
@@ -20,7 +20,7 @@ export interface VisitEventData {
 export class AnalyticsCollectionService {
   private analyticsGateway: any; // Will be injected later to avoid circular dependency
 
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   /**
    * Set analytics gateway for real-time updates
@@ -40,7 +40,10 @@ export class AnalyticsCollectionService {
       }
 
       // Check if this is a unique visitor based on IP and time window
-      const isUniqueVisitor = await this.checkUniqueVisitor(data.ipAddress, data.path);
+      const isUniqueVisitor = await this.checkUniqueVisitor(
+        data.ipAddress,
+        data.path,
+      );
 
       // If not unique (same IP visited same path within last hour), skip tracking
       if (!isUniqueVisitor) {
@@ -72,7 +75,7 @@ export class AnalyticsCollectionService {
       // Broadcast real-time visitor activity if gateway is available
       if (this.analyticsGateway) {
         this.analyticsGateway.broadcastVisitorActivity({
-          type: 'visit',
+          type: "visit",
           page: data.path,
           timestamp: new Date(),
           userAgent: data.userAgent,
@@ -85,7 +88,7 @@ export class AnalyticsCollectionService {
 
       return visitEvent;
     } catch (error) {
-      console.error('Error tracking visit:', error);
+      console.error("Error tracking visit:", error);
       throw error;
     }
   }
@@ -95,24 +98,24 @@ export class AnalyticsCollectionService {
    */
   private isAdminPath(path: string): boolean {
     const adminPaths = [
-      '/admin',
-      '/admin/',
-      '/admin/dashboard',
-      '/admin/analytics',
-      '/admin/projects',
-      '/admin/settings',
-      '/admin/media',
-      '/admin/contacts',
-      '/admin/services',
-      '/admin/team',
-      '/admin/skills',
-      '/admin/technologies',
-      '/admin/login'
+      "/admin",
+      "/admin/",
+      "/admin/dashboard",
+      "/admin/analytics",
+      "/admin/projects",
+      "/admin/settings",
+      "/admin/media",
+      "/admin/contacts",
+      "/admin/services",
+      "/admin/team",
+      "/admin/skills",
+      "/admin/technologies",
+      "/admin/login",
     ];
 
     // Check if path starts with any admin path
-    return adminPaths.some(adminPath =>
-      path === adminPath || path.startsWith(adminPath + '/')
+    return adminPaths.some(
+      (adminPath) => path === adminPath || path.startsWith(adminPath + "/"),
     );
   }
 
@@ -120,7 +123,10 @@ export class AnalyticsCollectionService {
    * Check if visitor is unique based on IP address and time window
    * Only count as new visit if same IP hasn't visited same path in last hour
    */
-  private async checkUniqueVisitor(ipAddress: string, path: string): Promise<boolean> {
+  private async checkUniqueVisitor(
+    ipAddress: string,
+    path: string,
+  ): Promise<boolean> {
     if (!ipAddress) return true; // If no IP, allow the visit
 
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
@@ -130,9 +136,9 @@ export class AnalyticsCollectionService {
         ipAddress: ipAddress,
         path: path,
         timestamp: {
-          gte: oneHourAgo
-        }
-      }
+          gte: oneHourAgo,
+        },
+      },
     });
 
     return !recentVisit; // Return true if no recent visit found
@@ -161,9 +167,13 @@ export class AnalyticsCollectionService {
   /**
    * Track user interaction (button click, form submission, etc.)
    */
-  async trackInteraction(type: string, data: any, sessionData: Partial<VisitEventData>) {
+  async trackInteraction(
+    type: string,
+    data: any,
+    sessionData: Partial<VisitEventData>,
+  ) {
     // Don't track interactions on admin pages
-    const path = sessionData.path || data.path || '/';
+    const path = sessionData.path || data.path || "/";
     if (this.isAdminPath(path)) {
       return null;
     }
@@ -171,7 +181,7 @@ export class AnalyticsCollectionService {
     // Store in user_interactions table
     return this.prisma.userInteraction.create({
       data: {
-        sessionId: sessionData.sessionId || 'anonymous',
+        sessionId: sessionData.sessionId || "anonymous",
         path: path,
         action: type,
         element: data.element,
@@ -224,9 +234,8 @@ export class AnalyticsCollectionService {
       if (data.referer) {
         await this.updateTrafficSourceAnalytics(data, today);
       }
-
     } catch (error) {
-      console.error('Error updating daily aggregates:', error);
+      console.error("Error updating daily aggregates:", error);
     }
   }
 
@@ -238,14 +247,14 @@ export class AnalyticsCollectionService {
       where: {
         date_deviceType_browser_os: {
           date,
-          deviceType: data.device || 'Unknown',
-          browser: data.browser || 'Unknown',
-          os: data.os || 'Unknown',
+          deviceType: data.device || "Unknown",
+          browser: data.browser || "Unknown",
+          os: data.os || "Unknown",
         },
       },
       create: {
         date,
-        deviceType: data.device || 'Unknown',
+        deviceType: data.device || "Unknown",
         browser: data.browser,
         os: data.os,
         visitors: 1,
@@ -272,15 +281,15 @@ export class AnalyticsCollectionService {
           date_source_medium_campaign: {
             date,
             source: source.source,
-            medium: source.medium || 'unknown',
-            campaign: source.campaign || 'unknown',
+            medium: source.medium || "unknown",
+            campaign: source.campaign || "unknown",
           },
         },
         create: {
           date,
           source: source.source,
-          medium: source.medium || 'unknown',
-          campaign: source.campaign || 'unknown',
+          medium: source.medium || "unknown",
+          campaign: source.campaign || "unknown",
           visitors: 1,
           sessions: 1,
         },
@@ -290,7 +299,7 @@ export class AnalyticsCollectionService {
         },
       });
     } catch (error) {
-      console.error('Error updating traffic source analytics:', error);
+      console.error("Error updating traffic source analytics:", error);
     }
   }
 
@@ -299,31 +308,31 @@ export class AnalyticsCollectionService {
    */
   private parseUserAgent(userAgent?: string) {
     if (!userAgent) {
-      return { device: 'Unknown', browser: 'Unknown', os: 'Unknown' };
+      return { device: "Unknown", browser: "Unknown", os: "Unknown" };
     }
 
-    let device = 'Desktop';
-    let browser = 'Unknown';
-    let os = 'Unknown';
+    let device = "Desktop";
+    let browser = "Unknown";
+    let os = "Unknown";
 
     // Detect device
     if (/Mobile|Android|iPhone|iPad/.test(userAgent)) {
-      device = /iPad/.test(userAgent) ? 'Tablet' : 'Mobile';
+      device = /iPad/.test(userAgent) ? "Tablet" : "Mobile";
     }
 
     // Detect browser
-    if (/Chrome/.test(userAgent)) browser = 'Chrome';
-    else if (/Firefox/.test(userAgent)) browser = 'Firefox';
-    else if (/Safari/.test(userAgent)) browser = 'Safari';
-    else if (/Edge/.test(userAgent)) browser = 'Edge';
-    else if (/Opera/.test(userAgent)) browser = 'Opera';
+    if (/Chrome/.test(userAgent)) browser = "Chrome";
+    else if (/Firefox/.test(userAgent)) browser = "Firefox";
+    else if (/Safari/.test(userAgent)) browser = "Safari";
+    else if (/Edge/.test(userAgent)) browser = "Edge";
+    else if (/Opera/.test(userAgent)) browser = "Opera";
 
     // Detect OS
-    if (/Windows/.test(userAgent)) os = 'Windows';
-    else if (/Mac OS X/.test(userAgent)) os = 'macOS';
-    else if (/Linux/.test(userAgent)) os = 'Linux';
-    else if (/Android/.test(userAgent)) os = 'Android';
-    else if (/iPhone|iPad/.test(userAgent)) os = 'iOS';
+    if (/Windows/.test(userAgent)) os = "Windows";
+    else if (/Mac OS X/.test(userAgent)) os = "macOS";
+    else if (/Linux/.test(userAgent)) os = "Linux";
+    else if (/Android/.test(userAgent)) os = "Android";
+    else if (/iPhone|iPad/.test(userAgent)) os = "iOS";
 
     return { device, browser, os };
   }
@@ -333,33 +342,33 @@ export class AnalyticsCollectionService {
    */
   private getTrafficSource(referer?: string) {
     if (!referer) {
-      return { source: 'Direct', medium: 'none', campaign: 'direct' };
+      return { source: "Direct", medium: "none", campaign: "direct" };
     }
 
-    let source = 'Referral';
-    let medium = 'referral';
-    let campaign = 'referral';
+    let source = "Referral";
+    let medium = "referral";
+    let campaign = "referral";
 
-    if (referer.includes('google.com')) {
-      source = 'Google';
-      medium = 'organic';
-      campaign = 'google-search';
-    } else if (referer.includes('facebook.com')) {
-      source = 'Facebook';
-      medium = 'social';
-      campaign = 'facebook';
-    } else if (referer.includes('linkedin.com')) {
-      source = 'LinkedIn';
-      medium = 'social';
-      campaign = 'linkedin';
-    } else if (referer.includes('twitter.com')) {
-      source = 'Twitter';
-      medium = 'social';
-      campaign = 'twitter';
-    } else if (referer.includes('instagram.com')) {
-      source = 'Instagram';
-      medium = 'social';
-      campaign = 'instagram';
+    if (referer.includes("google.com")) {
+      source = "Google";
+      medium = "organic";
+      campaign = "google-search";
+    } else if (referer.includes("facebook.com")) {
+      source = "Facebook";
+      medium = "social";
+      campaign = "facebook";
+    } else if (referer.includes("linkedin.com")) {
+      source = "LinkedIn";
+      medium = "social";
+      campaign = "linkedin";
+    } else if (referer.includes("twitter.com")) {
+      source = "Twitter";
+      medium = "social";
+      campaign = "twitter";
+    } else if (referer.includes("instagram.com")) {
+      source = "Instagram";
+      medium = "social";
+      campaign = "instagram";
     }
 
     return { source, medium, campaign };

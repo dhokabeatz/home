@@ -1,14 +1,14 @@
-import { IsOptional, IsString, IsInt, Min, IsBoolean } from 'class-validator';
-import { Transform } from 'class-transformer';
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { IsOptional, IsString, IsInt, Min, IsBoolean } from "class-validator";
+import { Transform } from "class-transformer";
+import { ApiPropertyOptional } from "@nestjs/swagger";
 
 export class ProjectQueryDto {
-  @ApiPropertyOptional({ example: 'PUBLISHED' })
+  @ApiPropertyOptional({ example: "PUBLISHED" })
   @IsOptional()
   @IsString()
   status?: string;
 
-  @ApiPropertyOptional({ example: 'react' })
+  @ApiPropertyOptional({ example: "react" })
   @IsOptional()
   @IsString()
   search?: string;
@@ -29,7 +29,7 @@ export class ProjectQueryDto {
 
   @ApiPropertyOptional({ example: true })
   @IsOptional()
-  @Transform(({ value }) => value === 'true')
+  @Transform(({ value }) => value === "true")
   @IsBoolean()
   published?: boolean;
 }

@@ -1,15 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { UploadService } from '../upload/upload.service';
-import { CreateProjectDto } from './dto/create-project.dto';
-import { UpdateProjectDto } from './dto/update-project.dto';
-import { ProjectQueryDto } from './dto/project-query.dto';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { PrismaService } from "../prisma/prisma.service";
+import { UploadService } from "../upload/upload.service";
+import { CreateProjectDto } from "./dto/create-project.dto";
+import { UpdateProjectDto } from "./dto/update-project.dto";
+import { ProjectQueryDto } from "./dto/project-query.dto";
 
 // SQLite compatibility - using string constants instead of enums
 const ProjectStatus = {
-  DRAFT: 'DRAFT',
-  PUBLISHED: 'PUBLISHED',
-  ARCHIVED: 'ARCHIVED'
+  DRAFT: "DRAFT",
+  PUBLISHED: "PUBLISHED",
+  ARCHIVED: "ARCHIVED",
 } as const;
 
 type ProjectStatus = (typeof ProjectStatus)[keyof typeof ProjectStatus];
@@ -19,7 +19,7 @@ export class ProjectsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly uploadService: UploadService,
-  ) { }
+  ) {}
 
   // Transform project data for frontend compatibility
   private transformProject(project: any) {
@@ -30,7 +30,7 @@ export class ProjectsService {
   }
 
   private transformProjects(projects: any[]) {
-    return projects.map(project => this.transformProject(project));
+    return projects.map((project) => this.transformProject(project));
   }
 
   async findAll(query: ProjectQueryDto) {
@@ -53,10 +53,10 @@ export class ProjectsService {
         where,
         include: {
           screenshots: {
-            orderBy: { order: 'asc' },
+            orderBy: { order: "asc" },
           },
         },
-        orderBy: { order: 'asc' },
+        orderBy: { order: "asc" },
         skip: (page - 1) * limit,
         take: limit,
       }),
@@ -79,13 +79,13 @@ export class ProjectsService {
       where: { id },
       include: {
         screenshots: {
-          orderBy: { order: 'asc' },
+          orderBy: { order: "asc" },
         },
       },
     });
 
     if (!project) {
-      throw new NotFoundException('Project not found');
+      throw new NotFoundException("Project not found");
     }
 
     return this.transformProject(project);
@@ -133,7 +133,10 @@ export class ProjectsService {
               await this.uploadService.deleteFile(publicId);
             }
           } catch (error) {
-            console.error(`Failed to delete old image from Cloudinary: ${screenshot.url}`, error);
+            console.error(
+              `Failed to delete old image from Cloudinary: ${screenshot.url}`,
+              error,
+            );
             // Continue with update even if Cloudinary deletion fails
           }
         }
@@ -179,7 +182,10 @@ export class ProjectsService {
             await this.uploadService.deleteFile(publicId);
           }
         } catch (error) {
-          console.error(`Failed to delete image from Cloudinary: ${screenshot.url}`, error);
+          console.error(
+            `Failed to delete image from Cloudinary: ${screenshot.url}`,
+            error,
+          );
           // Continue with deletion even if Cloudinary deletion fails
         }
       }
@@ -203,7 +209,7 @@ export class ProjectsService {
       const match = regex.exec(url);
       return match ? match[1] : null;
     } catch (error) {
-      console.error('Error extracting public ID from URL:', url, error);
+      console.error("Error extracting public ID from URL:", url, error);
       return null;
     }
   }

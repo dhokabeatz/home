@@ -12,7 +12,7 @@ on:
       - "backend/**"
 
 env:
-  AWS_REGION: us-east-1
+  AWS_REGION: eu-central-1
   NODE_VERSION: "18"
 
 jobs:
@@ -22,21 +22,6 @@ jobs:
     defaults:
       run:
         working-directory: ./backend
-
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_USER: postgres
-          POSTGRES_DB: henry_portfolio_test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
 
     steps:
       - name: Checkout code
@@ -55,10 +40,10 @@ jobs:
       - name: Generate Prisma client
         run: npx prisma generate
 
-      - name: Run database migrations
-        run: npx prisma migrate deploy
+      - name: Setup SQLite database
+        run: npx prisma migrate dev --name init-test
         env:
-          DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
+          DATABASE_URL: "file:./test.db"
 
       - name: Run linting
         run: npm run lint
@@ -66,7 +51,7 @@ jobs:
       - name: Run tests
         run: npm run test
         env:
-          DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
+          DATABASE_URL: "file:./test.db"
           JWT_SECRET: test-secret
           NODE_ENV: test
 
@@ -126,7 +111,7 @@ jobs:
           EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
           PAYSTACK_SECRET_KEY: ${{ secrets.PAYSTACK_SECRET_KEY }}
-          FRONTEND_URL: https://dhokabeatz.com
+          FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
 
       - name: Get API Gateway endpoint
         run: |

@@ -1,6 +1,6 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { UploadService } from '../upload/upload.service';
+import { Injectable, BadRequestException } from "@nestjs/common";
+import { PrismaService } from "../prisma/prisma.service";
+import { UploadService } from "../upload/upload.service";
 
 @Injectable()
 export class UsersService {
@@ -11,33 +11,44 @@ export class UsersService {
 
   async updateProfile(userId: string, updateUserProfileDto: any) {
     try {
-      console.log('Starting profile update for user:', userId);
-      console.log('Update data received:', updateUserProfileDto);
+      console.log("Starting profile update for user:", userId);
+      console.log("Update data received:", updateUserProfileDto);
 
       // Handle both frontend formats (name) and direct field updates
-      const { name, firstName, lastName, location, phone, bio, website } = updateUserProfileDto;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const {
+        name,
+        firstName,
+        lastName,
+        location,
+        phone,
+        bio: _,
+        website: __,
+      } = updateUserProfileDto;
 
       // If name is provided, split it into firstName and lastName
       let updatedFirstName = firstName;
       let updatedLastName = lastName;
 
-      if (name && typeof name === 'string') {
-        const nameParts = name.trim().split(' ');
-        updatedFirstName = nameParts[0] || '';
-        updatedLastName = nameParts.slice(1).join(' ') || '';
+      if (name && typeof name === "string") {
+        const nameParts = name.trim().split(" ");
+        updatedFirstName = nameParts[0] || "";
+        updatedLastName = nameParts.slice(1).join(" ") || "";
       }
 
-      console.log('Processed fields:', {
+      console.log("Processed fields:", {
         firstName: updatedFirstName,
         lastName: updatedLastName,
         location,
-        phone
+        phone,
       });
 
       const updatedUser = await this.prisma.user.update({
         where: { id: userId },
         data: {
-          ...(updatedFirstName !== undefined && { firstName: updatedFirstName }),
+          ...(updatedFirstName !== undefined && {
+            firstName: updatedFirstName,
+          }),
           ...(updatedLastName !== undefined && { lastName: updatedLastName }),
           ...(location !== undefined && { location }),
           ...(phone !== undefined && { phone }),
@@ -58,12 +69,12 @@ export class UsersService {
         },
       });
 
-      console.log('Profile updated successfully:', {
+      console.log("Profile updated successfully:", {
         id: updatedUser.id,
         firstName: updatedUser.firstName,
         lastName: updatedUser.lastName,
         location: updatedUser.location,
-        phone: updatedUser.phone
+        phone: updatedUser.phone,
       });
 
       // Return in the format the frontend expects
@@ -74,15 +85,19 @@ export class UsersService {
 
       return result;
     } catch (error) {
-      console.error('Profile update error:', error);
+      console.error("Profile update error:", error);
       throw error;
     }
   }
 
-  async uploadAboutContent(userId: string, contentType: string, file: Express.Multer.File) {
+  async uploadAboutContent(
+    userId: string,
+    contentType: string,
+    file: Express.Multer.File,
+  ) {
     try {
       // Read content from file
-      const content = file.buffer.toString('utf-8');
+      const content = file.buffer.toString("utf-8");
 
       // Get user settings or create if not exist
       let userSettings = await this.prisma.userSettings.findUnique({
@@ -98,23 +113,23 @@ export class UsersService {
       // Update the specific content field
       const updateData: any = {};
       switch (contentType) {
-        case 'heading':
+        case "heading":
           updateData.aboutHeading = content;
           break;
-        case 'subtitle':
+        case "subtitle":
           updateData.aboutSubtitle = content;
           break;
-        case 'paragraph1':
+        case "paragraph1":
           updateData.aboutParagraph1 = content;
           break;
-        case 'paragraph2':
+        case "paragraph2":
           updateData.aboutParagraph2 = content;
           break;
         default:
-          throw new BadRequestException('Invalid content type');
+          throw new BadRequestException("Invalid content type");
       }
 
-      const updatedSettings = await this.prisma.userSettings.update({
+      await this.prisma.userSettings.update({
         where: { userId },
         data: updateData,
       });
@@ -125,7 +140,9 @@ export class UsersService {
         content: content,
       };
     } catch (error) {
-      throw new BadRequestException('Failed to update about content: ' + error.message);
+      throw new BadRequestException(
+        "Failed to update about content: " + error.message,
+      );
     }
   }
 
@@ -139,16 +156,19 @@ export class UsersService {
     });
 
     if (!user) {
-      throw new BadRequestException('User not found');
+      throw new BadRequestException("User not found");
     }
 
     // Import bcrypt dynamically
-    const bcrypt = await import('bcryptjs');
+    const bcrypt = await import("bcryptjs");
 
     // Verify current password
-    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    const isCurrentPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.password,
+    );
     if (!isCurrentPasswordValid) {
-      throw new BadRequestException('Current password is incorrect');
+      throw new BadRequestException("Current password is incorrect");
     }
 
     // Hash new password
@@ -163,7 +183,7 @@ export class UsersService {
 
     return {
       success: true,
-      message: 'Password changed successfully',
+      message: "Password changed successfully",
     };
   }
 
@@ -172,7 +192,7 @@ export class UsersService {
       // Get user to check if they have an existing CV
       const user = await this.prisma.user.findUnique({
         where: { id: userId },
-        select: { cvUrl: true }
+        select: { cvUrl: true },
       });
 
       // Delete old CV from S3 if exists
@@ -182,13 +202,13 @@ export class UsersService {
           try {
             await this.uploadService.deleteFile(publicId);
           } catch (error) {
-            console.warn('Failed to delete old CV from S3:', error);
+            console.warn("Failed to delete old CV from S3:", error);
           }
         }
       }
 
       // Upload new CV to S3
-      const uploadResult = await this.uploadService.uploadFile(file, 'cv');
+      const uploadResult = await this.uploadService.uploadFile(file, "cv");
 
       // Update user with new CV URL from S3
       const updatedUser = await this.prisma.user.update({
@@ -210,9 +230,10 @@ export class UsersService {
       // Return user profile in the format expected by frontend
       const userProfile = {
         ...updatedUser,
-        name: updatedUser.firstName && updatedUser.lastName
-          ? `${updatedUser.firstName} ${updatedUser.lastName}`.trim()
-          : updatedUser.firstName || updatedUser.lastName || '',
+        name:
+          updatedUser.firstName && updatedUser.lastName
+            ? `${updatedUser.firstName} ${updatedUser.lastName}`.trim()
+            : updatedUser.firstName || updatedUser.lastName || "",
       };
 
       return {
@@ -220,48 +241,48 @@ export class UsersService {
         uploadResult: {
           success: true,
           cvUrl: updatedUser.cvUrl,
-          message: 'CV uploaded successfully',
+          message: "CV uploaded successfully",
         },
       };
     } catch (error) {
-      throw new BadRequestException('Failed to upload CV: ' + error.message);
+      throw new BadRequestException("Failed to upload CV: " + error.message);
     }
   }
 
   async uploadAvatar(userId: string, file: Express.Multer.File) {
     try {
-      console.log('Starting avatar upload for user:', userId);
-      console.log('File details:', {
+      console.log("Starting avatar upload for user:", userId);
+      console.log("File details:", {
         originalname: file.originalname,
         mimetype: file.mimetype,
-        size: file.size
+        size: file.size,
       });
 
       // Get user to check if they have an existing avatar
       const user = await this.prisma.user.findUnique({
         where: { id: userId },
-        select: { avatar: true }
+        select: { avatar: true },
       });
 
-      console.log('Current user avatar:', user?.avatar || 'none');
+      console.log("Current user avatar:", user?.avatar || "none");
 
       // Delete old avatar from S3 if exists
       if (user?.avatar) {
         const publicId = this.extractPublicIdFromUrl(user.avatar);
         if (publicId) {
           try {
-            console.log('Deleting old avatar from S3:', publicId);
+            console.log("Deleting old avatar from S3:", publicId);
             await this.uploadService.deleteFile(publicId);
           } catch (error) {
-            console.warn('Failed to delete old avatar from S3:', error);
+            console.warn("Failed to delete old avatar from S3:", error);
           }
         }
       }
 
       // Upload new avatar to S3
-      console.log('Uploading new avatar to S3...');
-      const uploadResult = await this.uploadService.uploadFile(file, 'avatars');
-      console.log('S3 upload successful:', uploadResult.secureUrl);
+      console.log("Uploading new avatar to S3...");
+      const uploadResult = await this.uploadService.uploadFile(file, "avatars");
+      console.log("S3 upload successful:", uploadResult.secureUrl);
 
       // Update user with new avatar URL from S3
       const updatedUser = await this.prisma.user.update({
@@ -280,14 +301,15 @@ export class UsersService {
         },
       });
 
-      console.log('User updated successfully:', updatedUser.avatar);
+      console.log("User updated successfully:", updatedUser.avatar);
 
       // Return user profile in the format expected by frontend
       const userProfile = {
         ...updatedUser,
-        name: updatedUser.firstName && updatedUser.lastName
-          ? `${updatedUser.firstName} ${updatedUser.lastName}`.trim()
-          : updatedUser.firstName || updatedUser.lastName || '',
+        name:
+          updatedUser.firstName && updatedUser.lastName
+            ? `${updatedUser.firstName} ${updatedUser.lastName}`.trim()
+            : updatedUser.firstName || updatedUser.lastName || "",
       };
 
       return {
@@ -295,12 +317,14 @@ export class UsersService {
         uploadResult: {
           success: true,
           avatarUrl: updatedUser.avatar,
-          message: 'Avatar uploaded successfully',
+          message: "Avatar uploaded successfully",
         },
       };
     } catch (error) {
-      console.error('Avatar upload error:', error);
-      throw new BadRequestException('Failed to upload avatar: ' + error.message);
+      console.error("Avatar upload error:", error);
+      throw new BadRequestException(
+        "Failed to upload avatar: " + error.message,
+      );
     }
   }
 
@@ -309,7 +333,7 @@ export class UsersService {
       // Get user to check if they have an existing about image
       const user = await this.prisma.user.findUnique({
         where: { id: userId },
-        select: { aboutImage: true }
+        select: { aboutImage: true },
       });
 
       // Delete old about image from S3 if exists
@@ -319,13 +343,13 @@ export class UsersService {
           try {
             await this.uploadService.deleteFile(publicId);
           } catch (error) {
-            console.warn('Failed to delete old about image from S3:', error);
+            console.warn("Failed to delete old about image from S3:", error);
           }
         }
       }
 
       // Upload new image to S3
-      const uploadResult = await this.uploadService.uploadFile(file, 'about');
+      const uploadResult = await this.uploadService.uploadFile(file, "about");
 
       // Update user with new about image URL from S3
       const updatedUser = await this.prisma.user.update({
@@ -340,10 +364,12 @@ export class UsersService {
       return {
         success: true,
         aboutImageUrl: updatedUser.aboutImage,
-        message: 'About image uploaded successfully',
+        message: "About image uploaded successfully",
       };
     } catch (error) {
-      throw new BadRequestException('Failed to upload about image: ' + error.message);
+      throw new BadRequestException(
+        "Failed to upload about image: " + error.message,
+      );
     }
   }
 
@@ -388,7 +414,7 @@ export class UsersService {
         isActive: true,
         createdAt: true,
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
   }
 
@@ -423,17 +449,13 @@ export class UsersService {
 
   async getPortfolioStats() {
     // Get real statistics from the database
-    const [
-      totalUsers,
-      totalProjects,
-      totalContacts,
-      totalVisits
-    ] = await Promise.all([
-      this.prisma.user.count(),
-      this.prisma.project.count(),
-      this.prisma.contact.count(),
-      this.prisma.visitEvent.count(),
-    ]);
+    const [totalUsers, totalProjects, totalContacts, totalVisits] =
+      await Promise.all([
+        this.prisma.user.count(),
+        this.prisma.project.count(),
+        this.prisma.contact.count(),
+        this.prisma.visitEvent.count(),
+      ]);
 
     return {
       totalUsers,
@@ -449,7 +471,7 @@ export class UsersService {
   async getAboutContent() {
     // Get the admin user's about image and settings
     const adminUser = await this.prisma.user.findFirst({
-      where: { role: 'ADMIN' },
+      where: { role: "ADMIN" },
       select: {
         aboutImage: true,
         settings: {
@@ -458,8 +480,8 @@ export class UsersService {
             aboutSubtitle: true,
             aboutParagraph1: true,
             aboutParagraph2: true,
-          }
-        }
+          },
+        },
       },
     });
 
@@ -468,10 +490,14 @@ export class UsersService {
     return {
       imageUrl: adminUser?.aboutImage || null,
       content: {
-        heading: settings?.aboutHeading || 'About Me',
-        subtitle: settings?.aboutSubtitle || 'Full Stack Developer',
-        paragraph1: settings?.aboutParagraph1 || 'Welcome to my portfolio. I am a passionate developer with years of experience.',
-        paragraph2: settings?.aboutParagraph2 || 'I create amazing web applications using modern technologies and best practices.',
+        heading: settings?.aboutHeading || "About Me",
+        subtitle: settings?.aboutSubtitle || "Full Stack Developer",
+        paragraph1:
+          settings?.aboutParagraph1 ||
+          "Welcome to my portfolio. I am a passionate developer with years of experience.",
+        paragraph2:
+          settings?.aboutParagraph2 ||
+          "I create amazing web applications using modern technologies and best practices.",
         image: adminUser?.aboutImage || null,
       },
     };
@@ -508,7 +534,7 @@ export class UsersService {
   async getSiteSettings() {
     // Get the admin user's settings for site-wide configuration
     const adminUser = await this.prisma.user.findFirst({
-      where: { role: 'ADMIN' },
+      where: { role: "ADMIN" },
       select: {
         settings: {
           select: {
@@ -520,8 +546,8 @@ export class UsersService {
             emailUrl: true,
             analyticsEnabled: true,
             contactFormEnabled: true,
-          }
-        }
+          },
+        },
       },
     });
 
@@ -529,7 +555,9 @@ export class UsersService {
 
     return {
       seoTitle: settings?.seoTitle || "Henry Agyemang - Full Stack Developer",
-      seoDescription: settings?.seoDescription || "Experienced full-stack developer specializing in React, Node.js, and cloud solutions.",
+      seoDescription:
+        settings?.seoDescription ||
+        "Experienced full-stack developer specializing in React, Node.js, and cloud solutions.",
       githubUrl: settings?.githubUrl || null,
       linkedinUrl: settings?.linkedinUrl || null,
       twitterUrl: settings?.twitterUrl || null,
@@ -542,7 +570,7 @@ export class UsersService {
   async getPublicProfile() {
     // Get the admin user's public profile information
     const adminUser = await this.prisma.user.findFirst({
-      where: { role: 'ADMIN' },
+      where: { role: "ADMIN" },
       select: {
         id: true,
         email: true,
@@ -560,17 +588,17 @@ export class UsersService {
             githubUrl: true,
             linkedinUrl: true,
             twitterUrl: true,
-          }
-        }
+          },
+        },
       },
     });
 
     if (!adminUser) {
       // Return default profile if no admin user exists
       return {
-        id: 'default',
-        email: 'henry@example.com',
-        name: 'Henry Agyemang',
+        id: "default",
+        email: "henry@example.com",
+        name: "Henry Agyemang",
         phone: null,
         location: null,
         avatar: null,
@@ -582,7 +610,7 @@ export class UsersService {
           githubUrl: null,
           linkedinUrl: null,
           twitterUrl: null,
-        }
+        },
       };
     }
 

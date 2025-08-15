@@ -1,12 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateServiceDto } from './dto/create-service.dto';
-import { UpdateServiceDto } from './dto/update-service.dto';
-import { ServiceQueryDto } from './dto/service-query.dto';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { PrismaService } from "../prisma/prisma.service";
+import { CreateServiceDto } from "./dto/create-service.dto";
+import { UpdateServiceDto } from "./dto/update-service.dto";
+import { ServiceQueryDto } from "./dto/service-query.dto";
 
 @Injectable()
 export class ServicesService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async findAll(query: ServiceQueryDto) {
     const { search, isActive, page = 1, limit = 10 } = query;
@@ -15,8 +15,8 @@ export class ServicesService {
       ...(isActive !== undefined && { isActive }),
       ...(search && {
         OR: [
-          { title: { contains: search, mode: 'insensitive' as const } },
-          { description: { contains: search, mode: 'insensitive' as const } },
+          { title: { contains: search, mode: "insensitive" as const } },
+          { description: { contains: search, mode: "insensitive" as const } },
         ],
       }),
     };
@@ -24,7 +24,7 @@ export class ServicesService {
     const [services, total] = await Promise.all([
       this.prisma.service.findMany({
         where,
-        orderBy: { order: 'asc' },
+        orderBy: { order: "asc" },
         skip: (page - 1) * limit,
         take: limit,
       }),
@@ -48,7 +48,7 @@ export class ServicesService {
     });
 
     if (!service) {
-      throw new NotFoundException('Service not found');
+      throw new NotFoundException("Service not found");
     }
 
     return service;

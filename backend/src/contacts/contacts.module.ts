@@ -1,8 +1,8 @@
-import { Module } from '@nestjs/common';
-import { ContactsService } from './contacts.service';
-import { ContactsController } from './contacts.controller';
-import { PrismaModule } from '../prisma/prisma.module';
-import { EmailModule } from '../common/email/email.module';
+import { Module } from "@nestjs/common";
+import { ContactsService } from "./contacts.service";
+import { ContactsController } from "./contacts.controller";
+import { PrismaModule } from "../prisma/prisma.module";
+import { EmailModule } from "../common/email/email.module";
 
 @Module({
   imports: [PrismaModule, EmailModule],
@@ -10,4 +10,4 @@ import { EmailModule } from '../common/email/email.module';
   providers: [ContactsService],
   exports: [ContactsService],
 })
-export class ContactsModule { }
+export class ContactsModule {}

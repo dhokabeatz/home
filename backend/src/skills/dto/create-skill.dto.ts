@@ -1,8 +1,15 @@
-import { IsString, IsInt, IsBoolean, IsOptional, Min, Max } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsString,
+  IsInt,
+  IsBoolean,
+  IsOptional,
+  Min,
+  Max,
+} from "class-validator";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
 export class CreateSkillDto {
-  @ApiProperty({ example: 'React' })
+  @ApiProperty({ example: "React" })
   @IsString()
   name: string;
 
@@ -12,14 +19,14 @@ export class CreateSkillDto {
   @Max(100)
   percentage: number;
 
-  @ApiProperty({ example: 'Frontend' })
+  @ApiProperty({ example: "Frontend" })
   @IsString()
   category: string;
 
-  @ApiPropertyOptional({ example: '#3B82F6' })
+  @ApiPropertyOptional({ example: "#3B82F6" })
   @IsOptional()
   @IsString()
-  color?: string = '#3B82F6';
+  color?: string = "#3B82F6";
 
   @ApiPropertyOptional({ example: true })
   @IsOptional()

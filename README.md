@@ -25,7 +25,7 @@ A modern, full-stack portfolio website built with React (frontend) and NestJS (b
 ### Backend API
 
 - **RESTful API**: Well-documented API with Swagger/OpenAPI
-- **Database**: PostgreSQL with Prisma ORM
+- **Database**: SQLite with Prisma ORM
 - **Security**: Rate limiting, CORS, helmet, input validation
 - **Email Service**: Nodemailer for notifications and alerts
 - **File Storage**: AWS S3 integration for media files
@@ -46,7 +46,7 @@ A modern, full-stack portfolio website built with React (frontend) and NestJS (b
 ### Backend
 
 - **NestJS** with TypeScript
-- **Prisma** ORM with PostgreSQL
+- **Prisma** ORM with SQLite
 - **JWT** authentication
 - **Winston** for logging
 - **Swagger** for API documentation
@@ -66,7 +66,7 @@ A modern, full-stack portfolio website built with React (frontend) and NestJS (b
 ### Prerequisites
 
 - Node.js 18+ and npm
-- PostgreSQL database
+- SQLite database
 - Redis server
 - AWS S3 bucket (for file storage)
 
@@ -102,7 +102,7 @@ cp .env.example .env
 Edit `.env` with your configuration:
 
 ```env
-DATABASE_URL="postgresql://username:password@localhost:5432/henry_portfolio"
+DATABASE_URL="file:./dev.db"
 JWT_SECRET="your-super-secret-jwt-key"
 REDIS_HOST="localhost"
 REDIS_PORT="6379"
@@ -328,7 +328,7 @@ For complete AWS setup instructions, see **[AWS_DEPLOYMENT_GUIDE.md](./AWS_DEPLO
 #### Backend (.env)
 
 ```bash
-DATABASE_URL="postgresql://user:pass@host:5432/db"
+DATABASE_URL="file:./prod.db"
 JWT_SECRET="your-super-secret-jwt-key"
 AWS_REGION="us-east-1"
 AWS_ACCESS_KEY_ID="your-access-key"

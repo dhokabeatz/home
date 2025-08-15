@@ -1,5 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
-import * as nodemailer from 'nodemailer';
+import { Injectable, Logger } from "@nestjs/common";
+import * as nodemailer from "nodemailer";
 
 export interface ContactEmailData {
   name: string;
@@ -27,7 +27,7 @@ export class EmailService {
   constructor() {
     this.transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT || '587'),
+      port: parseInt(process.env.SMTP_PORT || "587"),
       secure: false, // true for 465, false for other ports
       auth: {
         user: process.env.SMTP_USER, // Your email address
@@ -55,19 +55,19 @@ export class EmailService {
               <h3 style="color: #6366f1; margin-top: 0;">Contact Details</h3>
               <p><strong>Name:</strong> ${name}</p>
               <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
-              ${phone ? `<p><strong>Phone:</strong> <a href="tel:${phone}">${phone}</a></p>` : ''}
+              ${phone ? `<p><strong>Phone:</strong> <a href="tel:${phone}">${phone}</a></p>` : ""}
             </div>
             
             <div style="background-color: #fff; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px;">
               <h3 style="color: #333; margin-top: 0;">Message</h3>
-              <p style="line-height: 1.6; color: #555;">${message.replace(/\n/g, '<br>')}</p>
+              <p style="line-height: 1.6; color: #555;">${message.replace(/\n/g, "<br>")}</p>
             </div>
             
             <div style="margin-top: 20px; padding: 15px; background-color: #eff6ff; border-radius: 8px;">
               <p style="margin: 0; color: #1e40af; font-size: 14px;">
                 <strong>Quick Actions:</strong><br>
                 Reply to this email: <a href="mailto:${email}">Click here</a><br>
-                ${phone ? `Call directly: <a href="tel:${phone}">${phone}</a>` : ''}
+                ${phone ? `Call directly: <a href="tel:${phone}">${phone}</a>` : ""}
               </p>
             </div>
             
@@ -81,10 +81,9 @@ export class EmailService {
       // Send email
       const info = await this.transporter.sendMail(mailOptions);
       this.logger.log(`Contact email sent successfully: ${info.messageId}`);
-
     } catch (error) {
-      this.logger.error('Failed to send contact email:', error);
-      throw new Error('Failed to send email notification');
+      this.logger.error("Failed to send contact email:", error);
+      throw new Error("Failed to send email notification");
     }
   }
 
@@ -96,7 +95,7 @@ export class EmailService {
       const autoReplyOptions = {
         from: process.env.SMTP_USER,
         to: email,
-        subject: 'Thank you for your message!',
+        subject: "Thank you for your message!",
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
             <h2 style="color: #6366f1; text-align: center;">Thank You for Reaching Out!</h2>
@@ -136,14 +135,15 @@ export class EmailService {
 
       const info = await this.transporter.sendMail(autoReplyOptions);
       this.logger.log(`Auto-reply sent successfully: ${info.messageId}`);
-
     } catch (error) {
-      this.logger.error('Failed to send auto-reply email:', error);
+      this.logger.error("Failed to send auto-reply email:", error);
       // Don't throw error for auto-reply failure - it's not critical
     }
   }
 
-  async sendPurchaseNotification(purchaseData: PurchaseNotificationData): Promise<void> {
+  async sendPurchaseNotification(
+    purchaseData: PurchaseNotificationData,
+  ): Promise<void> {
     try {
       const {
         customerName,
@@ -153,7 +153,7 @@ export class EmailService {
         amount,
         currency,
         reference,
-        purchaseDate
+        purchaseDate,
       } = purchaseData;
 
       // Email to yourself (the portfolio owner) about the purchase
@@ -200,10 +200,11 @@ export class EmailService {
 
       // Send email
       const info = await this.transporter.sendMail(mailOptions);
-      this.logger.log(`Purchase notification email sent successfully: ${info.messageId}`);
-
+      this.logger.log(
+        `Purchase notification email sent successfully: ${info.messageId}`,
+      );
     } catch (error) {
-      this.logger.error('Failed to send purchase notification email:', error);
+      this.logger.error("Failed to send purchase notification email:", error);
       // Don't throw error for notification failure - it's not critical for payment flow
     }
   }

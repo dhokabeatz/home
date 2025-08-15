@@ -66,7 +66,7 @@ export default function SkillsSection() {
           },
           {
             id: "5",
-            name: "PostgreSQL/MongoDB",
+            name: "SQLite/MongoDB",
             percentage: 82,
             category: "Database",
             color: "bg-purple-500",

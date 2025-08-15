@@ -1,12 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateSkillDto } from './dto/create-skill.dto';
-import { UpdateSkillDto } from './dto/update-skill.dto';
-import { SkillQueryDto } from './dto/skill-query.dto';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { PrismaService } from "../prisma/prisma.service";
+import { CreateSkillDto } from "./dto/create-skill.dto";
+import { UpdateSkillDto } from "./dto/update-skill.dto";
+import { SkillQueryDto } from "./dto/skill-query.dto";
 
 @Injectable()
 export class SkillsService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async findAll(query: SkillQueryDto) {
     const { search, category, isActive, page = 1, limit = 10 } = query;
@@ -15,14 +15,14 @@ export class SkillsService {
       ...(isActive !== undefined && { isActive }),
       ...(category && { category }),
       ...(search && {
-        name: { contains: search, mode: 'insensitive' as const },
+        name: { contains: search, mode: "insensitive" as const },
       }),
     };
 
     const [skills, total] = await Promise.all([
       this.prisma.skill.findMany({
         where,
-        orderBy: { order: 'asc' },
+        orderBy: { order: "asc" },
         skip: (page - 1) * limit,
         take: limit,
       }),
@@ -46,7 +46,7 @@ export class SkillsService {
     });
 
     if (!skill) {
-      throw new NotFoundException('Skill not found');
+      throw new NotFoundException("Skill not found");
     }
 
     return skill;

@@ -40,7 +40,8 @@ export const useRealTimeAnalytics = () => {
 
   // Initialize socket connection
   useEffect(() => {
-    const backendUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:4000';
+    const apiUrl = (import.meta as any).env?.VITE_API_URL || 'http://localhost:4000/api';
+    const backendUrl = apiUrl.replace('/api', '');
 
     const socketInstance = io(`${backendUrl}/analytics`, {
       transports: ['websocket'],

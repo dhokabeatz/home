@@ -1,12 +1,12 @@
-import { LoggerService } from '@nestjs/common';
-import * as winston from 'winston';
+import { LoggerService } from "@nestjs/common";
+import * as winston from "winston";
 
 export class WinstonLogger implements LoggerService {
   private readonly logger: winston.Logger;
 
   constructor() {
     this.logger = winston.createLogger({
-      level: process.env.LOG_LEVEL || 'info',
+      level: process.env.LOG_LEVEL || "info",
       format: winston.format.combine(
         winston.format.timestamp(),
         winston.format.errors({ stack: true }),
@@ -20,11 +20,11 @@ export class WinstonLogger implements LoggerService {
           ),
         }),
         new winston.transports.File({
-          filename: 'logs/error.log',
-          level: 'error',
+          filename: "logs/error.log",
+          level: "error",
         }),
         new winston.transports.File({
-          filename: 'logs/combined.log',
+          filename: "logs/combined.log",
         }),
       ],
     });

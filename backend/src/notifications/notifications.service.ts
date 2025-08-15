@@ -1,19 +1,20 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateNotificationDto } from './dto/create-notification.dto';
-import { UpdateNotificationDto } from './dto/update-notification.dto';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { PrismaService } from "../prisma/prisma.service";
+import { CreateNotificationDto } from "./dto/create-notification.dto";
+import { UpdateNotificationDto } from "./dto/update-notification.dto";
 
 // SQLite compatibility - using string constants instead of enums
 const NotificationType = {
-  INFO: 'INFO',
-  SUCCESS: 'SUCCESS',
-  WARNING: 'WARNING',
-  ERROR: 'ERROR',
-  CONTACT: 'CONTACT',
-  SYSTEM: 'SYSTEM'
+  INFO: "INFO",
+  SUCCESS: "SUCCESS",
+  WARNING: "WARNING",
+  ERROR: "ERROR",
+  CONTACT: "CONTACT",
+  SYSTEM: "SYSTEM",
 } as const;
 
-type NotificationType = (typeof NotificationType)[keyof typeof NotificationType];
+type NotificationType =
+  (typeof NotificationType)[keyof typeof NotificationType];
 
 interface NotificationFilters {
   page: number;
@@ -24,9 +25,11 @@ interface NotificationFilters {
 
 @Injectable()
 export class NotificationsService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
-  async create(createNotificationDto: CreateNotificationDto & { userId: string }) {
+  async create(
+    createNotificationDto: CreateNotificationDto & { userId: string },
+  ) {
     const notification = await this.prisma.notification.create({
       data: {
         ...createNotificationDto,
@@ -37,7 +40,7 @@ export class NotificationsService {
     return {
       success: true,
       data: notification,
-      message: 'Notification created successfully',
+      message: "Notification created successfully",
     };
   }
 
@@ -53,14 +56,14 @@ export class NotificationsService {
       whereClause.isRead = false;
     }
 
-    if (type && type !== 'all') {
+    if (type && type !== "all") {
       whereClause.type = type.toUpperCase() as NotificationType;
     }
 
     const [notifications, total] = await Promise.all([
       this.prisma.notification.findMany({
         where: whereClause,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
         skip,
         take: limit,
         select: {
@@ -117,7 +120,7 @@ export class NotificationsService {
     });
 
     if (!notification) {
-      throw new NotFoundException('Notification not found');
+      throw new NotFoundException("Notification not found");
     }
 
     return {
@@ -135,7 +138,7 @@ export class NotificationsService {
     });
 
     if (!notification) {
-      throw new NotFoundException('Notification not found');
+      throw new NotFoundException("Notification not found");
     }
 
     const updated = await this.prisma.notification.update({
@@ -149,7 +152,7 @@ export class NotificationsService {
     return {
       success: true,
       data: updated,
-      message: 'Notification marked as read',
+      message: "Notification marked as read",
     };
   }
 
@@ -167,11 +170,15 @@ export class NotificationsService {
 
     return {
       success: true,
-      message: 'All notifications marked as read',
+      message: "All notifications marked as read",
     };
   }
 
-  async update(id: string, updateNotificationDto: UpdateNotificationDto, userId: string) {
+  async update(
+    id: string,
+    updateNotificationDto: UpdateNotificationDto,
+    userId: string,
+  ) {
     const notification = await this.prisma.notification.findFirst({
       where: {
         id,
@@ -180,7 +187,7 @@ export class NotificationsService {
     });
 
     if (!notification) {
-      throw new NotFoundException('Notification not found');
+      throw new NotFoundException("Notification not found");
     }
 
     const updated = await this.prisma.notification.update({
@@ -191,7 +198,7 @@ export class NotificationsService {
     return {
       success: true,
       data: updated,
-      message: 'Notification updated successfully',
+      message: "Notification updated successfully",
     };
   }
 
@@ -204,7 +211,7 @@ export class NotificationsService {
     });
 
     if (!notification) {
-      throw new NotFoundException('Notification not found');
+      throw new NotFoundException("Notification not found");
     }
 
     await this.prisma.notification.delete({
@@ -213,7 +220,7 @@ export class NotificationsService {
 
     return {
       success: true,
-      message: 'Notification deleted successfully',
+      message: "Notification deleted successfully",
     };
   }
 
@@ -227,7 +234,7 @@ export class NotificationsService {
 
     return {
       success: true,
-      message: 'Notifications deleted successfully',
+      message: "Notifications deleted successfully",
     };
   }
 
@@ -251,13 +258,17 @@ export class NotificationsService {
   }
 
   // Create notification for new contact submissions
-  async createContactNotification(userId: string, contactName: string, contactEmail: string) {
+  async createContactNotification(
+    userId: string,
+    contactName: string,
+    contactEmail: string,
+  ) {
     return this.createSystemNotification(
       userId,
-      'New Contact Message',
+      "New Contact Message",
       `New message from ${contactName} (${contactEmail})`,
       NotificationType.CONTACT,
-      '/admin/contacts',
+      "/admin/contacts",
       { contactName, contactEmail },
     );
   }

@@ -1,12 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateTeamMemberDto } from './dto/create-team-member.dto';
-import { UpdateTeamMemberDto } from './dto/update-team-member.dto';
-import { TeamMemberQueryDto } from './dto/team-member-query.dto';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { PrismaService } from "../prisma/prisma.service";
+import { CreateTeamMemberDto } from "./dto/create-team-member.dto";
+import { UpdateTeamMemberDto } from "./dto/update-team-member.dto";
+import { TeamMemberQueryDto } from "./dto/team-member-query.dto";
 
 @Injectable()
 export class TeamService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async findAll(query: TeamMemberQueryDto) {
     const { search, isActive, page = 1, limit = 10 } = query;
@@ -15,8 +15,8 @@ export class TeamService {
       ...(isActive !== undefined && { isActive }),
       ...(search && {
         OR: [
-          { name: { contains: search, mode: 'insensitive' as const } },
-          { role: { contains: search, mode: 'insensitive' as const } },
+          { name: { contains: search, mode: "insensitive" as const } },
+          { role: { contains: search, mode: "insensitive" as const } },
         ],
       }),
     };
@@ -24,7 +24,7 @@ export class TeamService {
     const [teamMembers, total] = await Promise.all([
       this.prisma.teamMember.findMany({
         where,
-        orderBy: { order: 'asc' },
+        orderBy: { order: "asc" },
         skip: (page - 1) * limit,
         take: limit,
       }),
@@ -48,7 +48,7 @@ export class TeamService {
     });
 
     if (!teamMember) {
-      throw new NotFoundException('Team member not found');
+      throw new NotFoundException("Team member not found");
     }
 
     return teamMember;

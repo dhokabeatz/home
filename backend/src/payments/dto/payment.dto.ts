@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsOptional, IsEmail } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsEmail } from "class-validator";
 
 export class InitializePaymentDto {
   @IsString()

@@ -1,11 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateTechnologyDto } from './dto/create-technology.dto';
-import { UpdateTechnologyDto } from './dto/update-technology.dto';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { PrismaService } from "../prisma/prisma.service";
+import { CreateTechnologyDto } from "./dto/create-technology.dto";
+import { UpdateTechnologyDto } from "./dto/update-technology.dto";
 
 @Injectable()
 export class TechnologiesService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async findAll(query?: { isActive?: boolean }) {
     const where: any = {};
@@ -16,7 +16,7 @@ export class TechnologiesService {
 
     const technologies = await this.prisma.technology.findMany({
       where,
-      orderBy: { order: 'asc' },
+      orderBy: { order: "asc" },
     });
 
     return {
@@ -59,6 +59,6 @@ export class TechnologiesService {
       where: { id },
     });
 
-    return { message: 'Technology deleted successfully' };
+    return { message: "Technology deleted successfully" };
   }
 }

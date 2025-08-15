@@ -1,9 +1,9 @@
-import { Module } from '@nestjs/common';
-import { AnalyticsController } from './analytics.controller';
-import { AnalyticsService } from './analytics.service';
-import { AnalyticsCollectionService } from './analytics-collection.service';
-import { AnalyticsGateway } from './analytics.gateway';
-import { PrismaModule } from '../prisma/prisma.module';
+import { Module } from "@nestjs/common";
+import { AnalyticsController } from "./analytics.controller";
+import { AnalyticsService } from "./analytics.service";
+import { AnalyticsCollectionService } from "./analytics-collection.service";
+import { AnalyticsGateway } from "./analytics.gateway";
+import { PrismaModule } from "../prisma/prisma.module";
 
 @Module({
   imports: [PrismaModule],
