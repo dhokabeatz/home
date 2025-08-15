@@ -3,9 +3,7 @@ service: ing-henry-portfolio-backend
 frameworkVersion: "4"
 
 org: dhokabeatz
-app: portfolio-websitevice: ing-henry-portfolio-backend
-
-frameworkVersion: "4"
+app: portfolio-website
 
 provider:
   name: aws
