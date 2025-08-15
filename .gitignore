@@ -45,6 +45,8 @@ out/
 # Database
 *.db
 *.sqlite
+# Exception: Include production database for deployment
+!backend/prisma/dev.db
 
 # Backup and temporary files
 *.backup
